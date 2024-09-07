@@ -1,20 +1,45 @@
-<!doctype html>
-<html>
-	<head>
-		<title>Example website</title>
-		<meta charset="utf-8"/>
-		<meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
-		<meta name="viewport" content="width=device-width, initial-scale=1"/>
-      <style type="text/css">* {font-family: Inter;} body {padding: 2em;}</style>
-	</head>
-	<body>
-		<div>
-			<h1>Hello world!</h1>
-			<p>This is a example website.</p>
-            <!-- Hi! -->
-			<p>
-				<a href="https://tiagorangel.com/">Learn More</a>
-			</p>
-		</div>
-	</body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Continuous Website</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Optional: Link to your CSS file -->
+    <style>
+        /* Add some basic styles */
+        .content-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to My Continuous Website</h1>
+
+    <!-- Placeholder divs for loading content dynamically -->
+    <div id="page1" class="content-section"></div>
+    <div id="page2" class="content-section"></div>
+    <div id="page3" class="content-section"></div>
+    <!-- Add more divs for each HTML file as needed -->
+
+    <!-- JavaScript to dynamically load content -->
+    <script>
+        // Function to load HTML content into a given div
+        function loadHTMLContent(url, elementId) {
+            fetch(url)
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById(elementId).innerHTML = data;
+                })
+                .catch(error => console.error('Error loading content:', error));
+        }
+
+        // Load each HTML file into its respective div
+        loadHTMLContent('W01/W01P1.html', 'page1');
+        loadHTMLContent('W01/W01P2.html', 'page2');
+        loadHTMLContent('W01/W01P3.html', 'page3');
+        // Add more lines to load additional pages as needed
+    </script>
+</body>
 </html>
