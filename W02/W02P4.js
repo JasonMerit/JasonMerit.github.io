@@ -9,7 +9,7 @@ function setupWebGL(canvas) {
 
 window.onload = function init()
 {
-    let canvas = document.getElementById( "w2p3" );
+    let canvas = document.getElementById( "w2p4" );
     
     let gl = WebGLUtils.setupWebGL( canvas );
     if ( !gl ) { alert( "WebGL isn't available" ); }
