@@ -1,0 +1,61 @@
+<html>
+    <head>
+        <title>W02P2</title>
+    </head>
+<script id="vertex-shader" type="x-shader/x-vertex">
+    attribute vec4 v_position;
+    attribute vec4 a_color;  // Receive color from js
+    varying vec4 v_color;  // Send color to fragment shader
+    void main() {
+        gl_Position = v_position;
+        v_color = a_color;
+        gl_PointSize = 10.0;
+        
+        
+    }
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+    precision mediump float;
+    varying vec4 v_color;
+    void main() {
+        gl_FragColor = v_color;
+    }
+</script>
+
+<script type="text/javascript" src="../angelCommon/webgl-utils.js"></script>
+<script type="text/javascript" src="../angelCommon/initShaders.js"></script>
+<script type="text/javascript" src="../angelCommon/MV.js"></script>
+<script type="text/javascript" src="W02P2.js"></script>
+
+<body>
+    <h2>W02P2</h2>
+<canvas id="w2p2" width="512" height="512">
+<!-- The following message is displayed if the browser doesn’t
+-- support HTML5 -->
+Sorry; your web browser does not support HTML5's canvas element.
+</canvas>
+<select id=colorMenu size=”8”>
+    <option selected>Black</option>  <!-- default color -->
+    <option>Red</option>
+    <option>Yellow</option>
+    <option>Green</option>
+    <option>Blue</option>
+    <option>Magenta</option>
+    <option>Cyan</option>
+    <option>Cornflower</option>
+</select>
+<select id=clearMenu size=”1”>
+    <option>Black</option>
+    <option>Red</option>
+    <option>Yellow</option>
+    <option>Green</option>
+    <option>Blue</option>
+    <option>Magenta</option>
+    <option>Cyan</option>
+    <option selected>Cornflower</option>
+</select>
+<button id=clearButton>clear canvas</button>
+
+</body>
+</html>

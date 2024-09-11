@@ -1,5 +1,5 @@
 window.onload = function init() {
-    var canvas = document.getElementById("c")
+    var canvas = document.getElementById("w1p1")
     var gl = WebGLUtils.setupWebGL(canvas)
     gl.viewport( 0, 0, canvas.width, canvas.height )
     if (!gl) {

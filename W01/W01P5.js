@@ -38,6 +38,14 @@ window.onload = function init()
         var x = radius * Math.cos(angle);
         var y = radius * Math.sin(angle);
         points.push(vec2(x, y));
+
+        angle += 2 * Math.PI / n;
+        x = radius * Math.cos(angle);
+        y = radius * Math.sin(angle);
+        points.push(vec2(x, y));
+
+
+        points.push(vec2(0.0, 0.0));
     }
 
     vBuffer = gl.createBuffer();
@@ -50,7 +58,9 @@ window.onload = function init()
     // Set shader uniforms
     uOffset = gl.getUniformLocation(program, "offset");
     
-    render();
+    // render();
+    function animate() {render(); requestAnimationFrame(animate)}
+    animate();
 };
 
 
@@ -66,7 +76,7 @@ function render() {
 
     gl.clearColor(0.3921, 0.5843, 0.9294, 1.0)
     gl.clear( gl.COLOR_BUFFER_BIT );
-    gl.drawArrays( gl.TRIANGLE_FAN, 0, points.length );
+    gl.drawArrays( gl.TRIANGLES, 0, points.length );
     
-    requestAnimationFrame(render);
+    // requestAnimationFrame(render);
 }

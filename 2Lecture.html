@@ -1,0 +1,55 @@
+<html>
+    <select id=”colorMenu” size=”8”>
+        <option value=”0” selected>Black</option>  <!-- default color -->
+        <option value=”1”>Red</option>
+        <option value=”2”>Yellow</option>
+        <option value=”3”>Green</option>
+        <option value=”4”>Blue</option>
+        <option value=”5”>Magenta</option>
+        <option value=”6”>Cyan</option>
+        <option value=”7”>Cornflower</option>
+        </select>
+        <select id=”clearMenu” size=”1”>
+        <option value=”0”>Black</option>
+        <option value=”1”>Red</option>
+        <option value=”2”>Yellow</option>
+        <option value=”3”>Green</option>
+        <option value=”4”>Blue</option>
+        <option value=”5”>Magenta</option>
+        <option value=”6”>Cyan</option>
+        <option value=”7” selected>Cornflower</option>
+        </select><br/>
+        <button id=”clearButton”>clear canvas</button>
+<script id="vertex-shader" type="x-shader/x-vertex">
+    uniform float size;
+    attribute vec4 vPosition;
+    void main() {
+        gl_Position.x = vPosition.x;
+        gl_Position.y = vPosition.y;
+        gl_Position.z = 1.0;
+        gl_Position.w = 1.0;
+
+        
+    }
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+    precision mediump float;
+    void main() {
+    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+    }
+</script>
+
+<script type="text/javascript" src="../angelCommon/webgl-utils.js"></script>
+<script type="text/javascript" src="../angelCommon/initShaders.js"></script>
+<script type="text/javascript" src="../angelCommon/MV.js"></script>
+<script type="text/javascript" src="2Lecture.js"></script>
+<body>
+<canvas id="gl-canvas" width="512" height="512">
+<!-- The following message is displayed if the browser doesn’t
+-- support HTML5 -->
+Sorry; your web browser does not support HTML5's canvas element.
+</canvas>
+</body>
+</html>
+

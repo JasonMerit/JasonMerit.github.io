@@ -12,7 +12,7 @@ var points;
 
 window.onload = function init()
 {
-    var canvas = document.getElementById( "gl-canvas" );
+    var canvas = document.getElementById( "w1p2" );
     
     gl = WebGLUtils.setupWebGL( canvas );
     if ( !gl ) { alert( "WebGL isn't available" ); }
@@ -22,10 +22,13 @@ window.onload = function init()
 
     var size = gl.getUniformLocation(program, "size");
     gl.uniform1f(size, 20.0);
+
     points = [ vec2(0.0, 0.0), vec2(1.0, 1.0), vec2(1.0, 0.0) ];
+    
     var vBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, flatten(points), gl.STATIC_DRAW);
+    
     var vPosition = gl.getAttribLocation(program, "a_Position");
     gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vPosition);

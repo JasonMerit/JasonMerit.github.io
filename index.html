@@ -15,31 +15,7 @@
     </style>
 </head>
 <body>
-    <h1>Welcome to My Continuous Website</h1>
-
-    <!-- Placeholder divs for loading content dynamically -->
-    <div id="W01P1" class="content-section"></div>
-    <div id="W01P2" class="content-section"></div>
-    <!-- <div id="W01P3" class="content-section"></div> -->
-    <!-- Add more divs for each HTML file as needed -->
-
-    <!-- JavaScript to dynamically load content -->
-    <script>
-        // Function to load HTML content into a given div
-        function loadHTMLContent(url, elementId) {
-            fetch(url)
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById(elementId).innerHTML = data;
-                })
-                .catch(error => console.error('Error loading content:', error));
-        }
-
-        // Load each HTML file into its respective div
-        loadHTMLContent('example.html', 'W01P1');
-        loadHTMLContent('W01P5.html', 'W01P2');
-        // loadHTMLContent('W01/W01P3.html', 'W01P3');
-        // Add more lines to load additional pages as needed
-    </script>
+    <a href="W01/W01P1.html">Week 1 Part 1</a><br>
+    <a href="W01/W01P2.html">Week 1 Part 2</a>
 </body>
 </html>
