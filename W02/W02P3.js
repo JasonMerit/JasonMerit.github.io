@@ -60,7 +60,7 @@ window.onload = function init()
         let p = vec2(2*(ev.clientX - bbox.left)/canvas.width - 1, 2*(canvas.height - ev.clientY + bbox.top - 1)/canvas.height - 1);
 
         // Draw the point as a square (two triangles)
-        let positions = []
+        let positions = [];
         add_point(positions, p, 0.04);
         gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
         gl.bufferSubData(gl.ARRAY_BUFFER, index*sizeof['vec2'], flatten(positions));
@@ -77,8 +77,9 @@ window.onload = function init()
 
     // Draw mode
     let drawMode = document.getElementById("drawMode");
+    let drawState = 0;
     drawMode.addEventListener("click", function() {
-        drawMode.selectedIndex
+        drawState = drawMode.selectedIndex
     });
     
     // Clear canvas
@@ -90,7 +91,6 @@ window.onload = function init()
         numPoints = 0; index = 0;
         requestAnimationFrame(() => {render(gl, numPoints)});
     });
-    
     
 };
 
