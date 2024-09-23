@@ -23,7 +23,11 @@ window.onload = function init()
     // Dynamic buffer position
     let max_verts = 1000;
     let index = 0; let numPoints = 0;
+    
+    // Drawing stuff
     let drawState = 1;
+    let trianglePoints = [];
+    let triangleColors = [];
     
     // Initialize vertex buffer
     let vBuffer = gl.createBuffer();
@@ -52,10 +56,6 @@ window.onload = function init()
         vec4(0.0, 0.8, 0.8, 1.0),  // cyan
         vec4(0.3921, 0.5843, 0.9294, 1.0), // cornflower blue
     ];
-
-    // Triangle state
-    let trianglePoints = [];
-    let triangleColors = [];
 
     // Add new point on click
     let colorMenu = document.getElementById("colorMenu");

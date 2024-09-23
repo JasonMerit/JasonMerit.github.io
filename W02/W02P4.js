@@ -21,9 +21,15 @@ window.onload = function init()
     gl.useProgram(program);
 
     // Dynamic buffer position
-    let max_verts = 1000;
+    let max_verts = 100000;
     let index = 0; let numPoints = 0;
-    let drawState = 1;
+
+    // Drawing stuff
+    let drawState = 2;
+    let trianglePoints = [];
+    let triangleColors = [];
+    let circleCenter = null;
+    let circleColor = null;
     
     // Initialize vertex buffer
     let vBuffer = gl.createBuffer();
@@ -53,10 +59,6 @@ window.onload = function init()
         vec4(0.3921, 0.5843, 0.9294, 1.0), // cornflower blue
     ];
 
-    // Triangle state
-    let trianglePoints = [];
-    let triangleColors = [];
-
     // Add new point on click
     let colorMenu = document.getElementById("colorMenu");
     canvas.addEventListener("click", function (ev) {
@@ -64,6 +66,7 @@ window.onload = function init()
         // Get the position of the click by offsetting by the canvas position and the color
         let bbox = ev.target.getBoundingClientRect();
         let p = vec2(2*(ev.clientX - bbox.left)/canvas.width - 1, 2*(canvas.height - ev.clientY + bbox.top - 1)/canvas.height - 1);
+        console.log("pressed at", p);
         let c = COLORS[colorMenu.selectedIndex];
         
         var delta = 6;  // Default to point
@@ -88,11 +91,31 @@ window.onload = function init()
                 index -= 12;
                 delta = 3;  // Triangle has 3 vertices
 
-            }
-            else {  // Add point to the triangle
+            } else {  // Add point to the triangle
                 add_point(positions, p, 0.04);
                 colors = Array(delta).fill(c);
             }
+        
+        } 
+        else if (drawState == 2) {  // Circle
+            if (circleCenter == null) {
+                circleCenter = p;
+                circleColor = c;
+                add_point(positions, p, 0.04);
+                colors = Array(delta).fill(c);
+            } else {
+                console.log("circleCenter", circleCenter);
+                add_circle(positions, circleCenter, p);
+                // colors = [circleColor, c];
+                colors = Array(300).fill(c);
+                circleCenter = null;
+                circleColor = null;
+
+                numPoints -= 6;  // Remove last point
+                index -= 6;
+                delta = 300;  // Circle has 3*100 vertices
+            }
+
         }
 
         gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
@@ -120,6 +143,8 @@ window.onload = function init()
         numPoints = 0; index = 0;
         trianglePoints = [];
         triangleColors = [];
+        circleCenter = null;
+        circleColor = null;
         requestAnimationFrame(() => {render(gl, numPoints)});
     });
     
@@ -136,6 +161,25 @@ function add_point(array, point, size) {
 function add_triangle(array, points) {
     array.push(points[0], points[1], points[2]);
 };
+
+function add_circle(array, center, point) {
+    let radius = Math.sqrt(Math.pow(point[0] - center[0], 2) + Math.pow(point[1] - center[1], 2));
+    let numPoints = 100;
+    let angle = 2 * Math.PI / numPoints;
+    for (var i = 0; i < numPoints; i++) {
+        let _angle = angle * i;
+        var x = radius * Math.cos(_angle) + center[0];
+        var y = radius * Math.sin(_angle) + center[1];
+        array.push(vec2(x, y));
+
+        _angle += angle;
+        x = radius * Math.cos(_angle) + center[0];
+        y = radius * Math.sin(_angle) + center[1];
+        array.push(vec2(x, y));
+
+        array.push(center);
+    }
+}
 
 
 function render(gl, numPoints) {
