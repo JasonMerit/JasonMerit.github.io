@@ -173,7 +173,7 @@ function add_circle(array, center, point) {
     array.push(center);
     array.push(vec2(radius * Math.cos(angle) + center[0], 
                     radius * Math.sin(angle) + center[1]));
-    for (var i = 1; i <= numPoints; i++) {
+    for (var i = 1; i < numPoints; i++) {
         array.push(array[array.length - 1]);
         array.push(center);
 
@@ -182,6 +182,9 @@ function add_circle(array, center, point) {
         var y = radius * Math.sin(_angle) + center[1];
         array.push(vec2(x, y));
     }
+    array.push(array[array.length - 1]);
+    array.push(center);
+    array.push(array[0]);
     console.log("length", array.length);
 }
 
