@@ -107,13 +107,13 @@ window.onload = function init()
                 console.log("circleCenter", circleCenter);
                 add_circle(positions, circleCenter, p);
                 // colors = [circleColor, c];
-                colors = Array(300).fill(c);
+                colors = Array(303).fill(c);
                 circleCenter = null;
                 circleColor = null;
 
                 numPoints -= 6;  // Remove last point
                 index -= 6;
-                delta = 300;  // Circle has 3*100 vertices
+                delta = 303;  // Circle has 3*100 vertices
             }
 
         }
@@ -160,25 +160,29 @@ function add_point(array, point, size) {
 
 function add_triangle(array, points) {
     array.push(points[0], points[1], points[2]);
+    console.log("length", array.length);
 };
 
 function add_circle(array, center, point) {
     let radius = Math.sqrt(Math.pow(point[0] - center[0], 2) + Math.pow(point[1] - center[1], 2));
     let numPoints = 100;
     let angle = 2 * Math.PI / numPoints;
-    for (var i = 0; i < numPoints; i++) {
+
+    // First iteration
+    array.push(vec2(radius + center[0], center[1]))
+    array.push(center);
+    array.push(vec2(radius * Math.cos(angle) + center[0], 
+                    radius * Math.sin(angle) + center[1]));
+    for (var i = 1; i <= numPoints; i++) {
+        array.push(array[array.length - 1]);
+        array.push(center);
+
         let _angle = angle * i;
         var x = radius * Math.cos(_angle) + center[0];
         var y = radius * Math.sin(_angle) + center[1];
         array.push(vec2(x, y));
-
-        _angle += angle;
-        x = radius * Math.cos(_angle) + center[0];
-        y = radius * Math.sin(_angle) + center[1];
-        array.push(vec2(x, y));
-
-        array.push(center);
     }
+    console.log("length", array.length);
 }
 
 
