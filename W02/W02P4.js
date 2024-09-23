@@ -66,9 +66,9 @@ window.onload = function init()
         // Get the position of the click by offsetting by the canvas position and the color
         let bbox = ev.target.getBoundingClientRect();
         let p = vec2(2*(ev.clientX - bbox.left)/canvas.width - 1, 2*(canvas.height - ev.clientY + bbox.top - 1)/canvas.height - 1);
-        console.log("pressed at", p);
         let c = COLORS[colorMenu.selectedIndex];
         
+        // Add points to vertex and fragment buffers depending on the draw state
         var delta = 6;  // Default to point
         let positions = [];
         let colors = []
@@ -83,13 +83,14 @@ window.onload = function init()
             if (trianglePoints.length == 3) {  // Need 3 points to make a triangle
                 // Add triangle and reset
                 add_triangle(positions, trianglePoints);
+                numPoints -= 12;  // Remove last two points
+                index -= 12;
+                delta = 3;  // Triangle has 3 vertices
+
                 colors = triangleColors;
                 trianglePoints = [];
                 triangleColors = [];
 
-                numPoints -= 12;  // Remove last two points
-                index -= 12;
-                delta = 3;  // Triangle has 3 vertices
 
             } else {  // Add point to the triangle
                 add_point(positions, p, 0.04);
@@ -104,16 +105,18 @@ window.onload = function init()
                 add_point(positions, p, 0.04);
                 colors = Array(delta).fill(c);
             } else {
-                console.log("circleCenter", circleCenter);
                 add_circle(positions, circleCenter, p);
                 // colors = [circleColor, c];
-                colors = Array(303).fill(c);
+                delta = 303;  // Circle has 3*101 vertices
+                numPoints -= 6;  // Remove last point
+                index -= 6;
+
+                // colors = Array(delta).fill(c);
+                let pattern = [c, circleColor, c];
+                colors = Array.from({ length: delta }, (_, i) => pattern[i % 3]).flat();
                 circleCenter = null;
                 circleColor = null;
 
-                numPoints -= 6;  // Remove last point
-                index -= 6;
-                delta = 303;  // Circle has 3*100 vertices
             }
 
         }
@@ -160,7 +163,6 @@ function add_point(array, point, size) {
 
 function add_triangle(array, points) {
     array.push(points[0], points[1], points[2]);
-    console.log("length", array.length);
 };
 
 function add_circle(array, center, point) {
@@ -173,6 +175,7 @@ function add_circle(array, center, point) {
     array.push(center);
     array.push(vec2(radius * Math.cos(angle) + center[0], 
                     radius * Math.sin(angle) + center[1]));
+
     for (var i = 1; i < numPoints; i++) {
         array.push(array[array.length - 1]);
         array.push(center);
@@ -182,10 +185,10 @@ function add_circle(array, center, point) {
         var y = radius * Math.sin(_angle) + center[1];
         array.push(vec2(x, y));
     }
+    // Last iteration
     array.push(array[array.length - 1]);
     array.push(center);
     array.push(array[0]);
-    console.log("length", array.length);
 }
 
 
