@@ -63,11 +63,12 @@ window.onload = function init() {
     gl.enableVertexAttribArray(vPosition);
     
     // Perspective projection
-    let P = ortho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);  // left, right, down, top, front, back
+    // let P = ortho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);  // left, right, down, top, front, back
+    let P = perspective(45.0, 1.0, 0.1, 10.0);  // fovy, aspect (w/h), near, far
 
     // View
-    let eye = vec3(0.5, 0.5, 0.5);
-    let at = vec3(1.0, 1.0, 1.0);
+    let eye = vec3(0.5, 0.5, -4.0);
+    let at = vec3(0.5, 0.5, 0.0);
     let look_up = vec3(0.0, 1.0, 0.0);
     let V = lookAt(eye, at, look_up);
 
