@@ -7,6 +7,7 @@ window.onload = function init() {
     
     let program = initShaders(gl, "vertex-shader", "fragment-shader");
     gl.useProgram(program);
+    gl.program = program;
 
     
     var ext = gl.getExtension('OES_element_index_uint');
@@ -67,25 +68,40 @@ window.onload = function init() {
     let P = perspective(45.0, 1.0, 0.1, 10.0);  // fovy, aspect (w/h), near, far
 
     // View
-    let eye = vec3(0.5, 0.5, -4.0);
-    let at = vec3(0.5, 0.5, 0.0);
-    let look_up = vec3(0.0, 1.0, 0.0);
-    let V = lookAt(eye, at, look_up);
+    let V = lookAt(vec3(0.5, 0.5, -4.5), vec3(0.5, 0.5, 0.0), vec3(0.0, 1.0, 0.0));  // eye, at, look_up
+
+    
+    
+    render(gl, wire_indices.length, V, P);
+    
+}   
+
+function render(gl, num_points, V, P) {
+    gl.clearColor(0.3921, 0.5843, 0.9294, 1.0)
+    gl.clear( gl.COLOR_BUFFER_BIT );
 
     // Model
     let M = mat4();
     
-    // MVP and send to shader    
+    // First cube one-point
     let MVP = mult(mult(P, V), M);
-    let mvp = gl.getUniformLocation(program, "MVP");
+    let mvp = gl.getUniformLocation(gl.program, "MVP");
     gl.uniformMatrix4fv(mvp, false, flatten(MVP));
-    
-    render(gl, wire_indices.length);
-    
-}   
 
-function render(gl, num_points) {
-    gl.clearColor(0.3921, 0.5843, 0.9294, 1.0)
-    gl.clear( gl.COLOR_BUFFER_BIT );
     gl.drawElements(gl.LINES, num_points, gl.UNSIGNED_INT, 0);
+
+    // Second cube two-point by x-Translation
+    M = translate(1.2, 0.0, 0.0);
+    MVP = mult(mult(P, V), M);
+    gl.uniformMatrix4fv(mvp, false, flatten(MVP));
+
+    gl.drawElements(gl.LINES, num_points, gl.UNSIGNED_INT, 0);
+
+    // Third cube three-point by x- and y-Translation
+    M = translate(1.2, -1.2, 0.0);
+    MVP = mult(mult(P, V), M);
+    gl.uniformMatrix4fv(mvp, false, flatten(MVP));
+
+    gl.drawElements(gl.LINES, num_points, gl.UNSIGNED_INT, 0);
+    
 }
