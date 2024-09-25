@@ -1,10 +1,9 @@
 <html>
 <script id="vertex-shader" type="x-shader/x-vertex">
     attribute vec4 a_Position;
-    uniform float size;
+    uniform mat4 modelViewMatrix;
     void main() {
-        gl_Position = a_Position;
-        gl_PointSize = size;
+        gl_Position = modelViewMatrix * a_Position;
         
     }
 </script>

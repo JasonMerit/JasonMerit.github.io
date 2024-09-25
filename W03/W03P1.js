@@ -8,8 +8,10 @@ window.onload = function init() {
     let program = initShaders(gl, "vertex-shader", "fragment-shader");
     gl.useProgram(program);
 
-    // https://developer.mozilla.org/en-US/docs/Web/API/OES_element_index_uint
-    const ext = gl.getExtension("OES_element_index_uint");
+    
+    var ext = gl.getExtension('OES_element_index_uint');
+    if (!ext) { console.log('Warning: Unable to use an extension'); }
+
     // Create a cube
     //    v5----- v6
     //    /|      /|
@@ -41,14 +43,14 @@ window.onload = function init() {
     ]);
     
     // Triangle mesh indices
-    var indices = new Uint32Array([
-        1, 0, 3, 3, 2, 1, // front
-        2, 3, 7, 7, 6, 2, // right
-        3, 0, 4, 4, 7, 3, // down
-        6, 5, 1, 1, 2, 6, // up
-        4, 5, 6, 6, 7, 4, // back
-        5, 4, 0, 0, 1, 5, // left
-    ]);
+    // var indices = new Uint32Array([
+    //     1, 0, 3, 3, 2, 1, // front
+    //     2, 3, 7, 7, 6, 2, // right
+    //     3, 0, 4, 4, 7, 3, // down
+    //     6, 5, 1, 1, 2, 6, // up
+    //     4, 5, 6, 6, 7, 4, // back
+    //     5, 4, 0, 0, 1, 5, // left
+    // ]);
     
     var iBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer);
@@ -60,7 +62,31 @@ window.onload = function init() {
     gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vPosition);
     
-    // render(wire_indices);
+    // Setting up the isometric camera
+    let left = -1.0;
+    let right = 1.0;
+    let down = -1.0;
+    let top = 1.0;
+    let front = -1.0;
+    let back = 1.0;
+    let P = ortho(left, right, down, top, front, back);
+
+    let eye = vec3(0.5, 0.5, 0.5);
+    let at = vec3(1.0, 1.0, 1.0);
+    let look_up = vec3(0.0, 1.0, 0.0);
+    let V = lookAt(eye, at, look_up);
+
+    let M = mat4();
+
+    let MVP = mult(mult(P, V), M);
+    // let MVP = mat4();
+
+    let mvp = gl.getUniformLocation(program, "MVP");
+    gl.uniformMatrix4fv(mvp, false, flatten(MVP));
+    
+    
+
+
     gl.clearColor(0.3921, 0.5843, 0.9294, 1.0)
     gl.clear( gl.COLOR_BUFFER_BIT );
     gl.drawElements(gl.LINES, wire_indices.length, gl.UNSIGNED_INT, 0);
