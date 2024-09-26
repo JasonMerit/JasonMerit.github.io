@@ -107,7 +107,7 @@ window.onload = function init()
             } else {
                 add_circle(positions, circleCenter, p);
                 // colors = [circleColor, c];
-                delta = 303;  // Circle has 3*101 vertices
+                delta = 300;  // Circle has 3*101 vertices
                 numPoints -= 6;  // Remove last point
                 index -= 6;
 
@@ -171,24 +171,19 @@ function add_circle(array, center, point) {
     let angle = 2 * Math.PI / numPoints;
 
     // First iteration
-    array.push(vec2(radius + center[0], center[1]))
-    array.push(center);
-    array.push(vec2(radius * Math.cos(angle) + center[0], 
-                    radius * Math.sin(angle) + center[1]));
-
-    for (var i = 1; i < numPoints; i++) {
-        array.push(array[array.length - 1]);
+    var point = vec2(radius + center[0], center[1])
+    for (var i = 1; i <= numPoints; i++) {
+        array.push(point);
         array.push(center);
-
-        let _angle = angle * i;
-        var x = radius * Math.cos(_angle) + center[0];
-        var y = radius * Math.sin(_angle) + center[1];
-        array.push(vec2(x, y));
+        point = vec2(radius * Math.cos(angle * i) + center[0], 
+                     radius * Math.sin(angle * i) + center[1]);
+        array.push(point);
     }
+    console.log(array.length);
     // Last iteration
-    array.push(array[array.length - 1]);
-    array.push(center);
-    array.push(array[0]);
+    // array.push(array[array.length - 1]);
+    // array.push(center);
+    // array.push(array[0]);
 }
 
 

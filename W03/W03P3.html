@@ -1,0 +1,46 @@
+<html>
+<script id="vertex-shader" type="x-shader/x-vertex">
+    attribute vec4 vPosition;
+    uniform mat4 MVP;
+    void main() {
+        gl_Position = MVP * vPosition;
+    }
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+    void main() {
+    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+    }
+</script>
+
+<script type="text/javascript" src="../angelCommon/webgl-utils.js"></script>
+<script type="text/javascript" src="../angelCommon/initShaders.js"></script>
+<script type="text/javascript" src="../angelCommon/MV.js"></script>
+<script type="text/javascript" src="W03P2.js"></script>
+<body>
+    <h1>W03P3</h1>
+<text>
+    In <strong>part 1</strong> the cube is drawn in isometric view (orthographic projection and viewing the cube along its diagonal) and the only transformation is done in the view matrix using the lookAt(eye, at, lookup) method.
+    The object is offset by <i>-e</i> with <i>V = [I -e; 0 1]</i>, where <i>I</i> is the 3x3 identity matrix, and <i>e</i> is the eye position.
+    <br>
+    The perspective matrix constructed by calling <b>ortho(l, r, b, t, n, f)</b> also has a translation, but because it is orthographic projection, due to l = -r, b=-t, and n=-f, the elements of the translation part are all 0.
+    
+    <br><br>
+    <strong>Part 2</strong> the cube is viewed from different perspectives, with the camera at a 45 degree vertical field of view.
+    No translation is made in the perspective when calling <b>perspective(fovy, aspect, near, far)</b>, and the view is the same as before. 
+    <br>
+    The different perspectives are achieved by translating the cube around using the model matrix. 
+    This is achieved by calling <b>translate(t_x, t_y, t_z)</b> gives as <br><i>M = [1 0 0 t_x; 0 1 0 t_y; 0 0 1 t_z; 0 0 0 1]</i>.
+    <br><br>
+    Matrix multiplication is not commutative, so the order of operations is important. All points <i>x</i> in the cube were transformed by the matrix product <i>PVMx</i>, where the multiplication order is significant: the point <i>x</i> is first multiplied by <i>M</i>, then by <i>V</i>, and finally by <i>P</i>
+    <br><br>
+<canvas id="gl-canvas" width="512" height="512">
+<!-- The following message is displayed if the browser doesn’t
+-- support HTML5 -->
+Sorry; your web browser does not support HTML5's canvas element.
+
+</canvas>
+</body>
+</html>
+
+
