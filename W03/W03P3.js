@@ -100,6 +100,6 @@ function render(gl, num_points, V, P) {
     MVP = mult(mult(P, V), M);
     gl.uniformMatrix4fv(mvp, false, flatten(MVP));
 
-    gl.drawElements(gl.LINES, num_points, gl.UNSIGNED_INT, 0);
+    gl.drawElements(gl.LINES, num_points, gl.UNSIGNED_INT, 0);  // drawElements allows reuse of vertices using the index buffer
     
 }

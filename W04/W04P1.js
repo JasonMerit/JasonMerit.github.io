@@ -22,84 +22,59 @@ window.onload = function init() {
     var ext = gl.getExtension('OES_element_index_uint');
     if (!ext) { console.log('Warning: Unable to use an extension'); }
 
-    // Create a cube
-    //    v5----- v6
-    //    /|      /|
-    //   v1------v2|
-    //   | |     | |
-    //   | |v4---|-|v7
-    //   |/      |/
-    //   v0------v3
+    // Create sphere using Tetrahedron
+    var va = vec4(0.0, 0.0, 1.0, 1);
+    var vb = vec4(0.0, 0.942809, -0.333333, 1);
+    var vc = vec4(-0.816497, -0.471405, -0.333333, 1);
+    var vd = vec4(0.816497, -0.471405, -0.333333, 1);
+    let pointsArray = [];
+
+    var numTimesToSubdivide = 5;
+    tetrahedron(pointsArray, va, vb, vc, vd, numTimesToSubdivide);
     
-    var vertices = [  // With W=1 on 4th column
-        vec4(0.0, 0.0, 1.0, 1.0),
-        vec4(0.0, 1.0, 1.0, 1.0),
-        vec4(1.0, 1.0, 1.0, 1.0),
-        vec4(1.0, 0.0, 1.0, 1.0),
-        vec4(0.0, 0.0, 0.0, 1.0),
-        vec4(0.0, 1.0, 0.0, 1.0),
-        vec4(1.0, 1.0, 0.0, 1.0),
-        vec4(1.0, 0.0, 0.0, 1.0),
-    ];
-    
-    // Wireframe indices
-    var wire_indices = new Uint32Array([
-        0, 1, 1, 2, 2, 3, 3, 0, // front
-        2, 3, 3, 7, 7, 6, 6, 2, // right
-        0, 3, 3, 7, 7, 4, 4, 0, // down
-        1, 2, 2, 6, 6, 5, 5, 1, // up
-        4, 5, 5, 6, 6, 7, 7, 4, // back
-        0, 1, 1, 5, 5, 4, 4, 0, // left
-    ]);
-    
-    // Triangle mesh indices
-    var indices = new Uint32Array([
-        1, 0, 3, 3, 2, 1, // front
-        2, 3, 7, 7, 6, 2, // right
-        3, 0, 4, 4, 7, 3, // down
-        6, 5, 1, 1, 2, 6, // up
-        4, 5, 6, 6, 7, 4, // back
-        5, 4, 0, 0, 1, 5, // left
-    ]);
-    
-    var iBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(indices), gl.STATIC_DRAW);
     var vBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW);
     var vPosition = gl.getAttribLocation(program, "vPosition");
     gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vPosition);
     
     // Perspective projection
-    // let P = ortho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);  // left, right, down, top, front, back
     let P = perspective(45.0, 1.0, 0.1, 10.0);  // fovy, aspect (w/h), near, far  (near far are clipping)
 
     // View
     let V = lookAt(vec3(0.5, 0.5, -4.5), vec3(0.5, 0.5, 0.0), vec3(0.0, 1.0, 0.0));  // eye, at, look_up
     
-
-    // Week 4
-    // tetrahedron(va, vb, vc, vd, numTimesToSubdivide);
-
-    render(gl, indices.length, V, P);
+    render(gl, pointsArray.length, V, P);
     
 }   
 
-// function tetrahedron(a, b, c, d, n) {
-//     divideTriangle(a, b, c, n);
-//     divideTriangle(d, c, b, n);
-//     divideTriangle(a, d, b, n);
-//     divideTriangle(a, c, d, n);
-// }
+function tetrahedron(pointsArray, a, b, c, d, n) {
+    divideTriangle(pointsArray, a, b, c, n);
+    divideTriangle(pointsArray, d, c, b, n);
+    divideTriangle(pointsArray, a, d, b, n);
+    divideTriangle(pointsArray, a, c, d, n);
+}
 
-// function triangle(a, b, c){
-//     pointsArray.push(a);
-//     pointsArray.push(a);
-//     pointsArray.push(a);
-//     index += 3;
-// }
+// Midpoint subdivision
+function divideTriangle(pointsArray, a, b, c, count) {
+    if (count > 0) {
+        var ab = normalize(mix(a, b, 0.5), true);
+        var ac = normalize(mix(a, c, 0.5), true);
+        var bc = normalize(mix(b, c, 0.5), true);
+        divideTriangle(pointsArray, a, ab, ac, count - 1);
+        divideTriangle(pointsArray, ab, b, bc, count - 1);
+        divideTriangle(pointsArray, bc, c, ac, count - 1);
+        divideTriangle(pointsArray, ab, bc, ac, count - 1);
+    } 
+    else { triangle(pointsArray, a, b, c); }
+}
+
+function triangle(pointsArray, a, b, c) {
+    pointsArray.push(a);
+    pointsArray.push(b);
+    pointsArray.push(c);
+}
 
 
 
@@ -118,7 +93,7 @@ function render(gl, num_points, V, P) {
     let mvp = gl.getUniformLocation(gl.program, "MVP");
     gl.uniformMatrix4fv(mvp, false, flatten(MVP));
 
-    gl.drawElements(gl.TRIANGLES, num_points, gl.UNSIGNED_INT, 0);
+    gl.drawArrays(gl.TRIANGLES, 0, num_points);
 
     
 }
