@@ -101,7 +101,7 @@ function render(gl) {
     let M = mat4();
 
     // View
-    let V = lookAt(vec3(0.5, 0.5, -4.5), vec3(0.5, 0.5, 0.0), vec3(0.0, 1.0, 0.0));  // eye, at, look_up
+    let V = lookAt(vec3(0, 0, -4.5), vec3(0, 0, 0.0), vec3(0.0, 1.0, 0.0));  // eye, at, look_up
 
     // Perspective projection
     let P = perspective(45.0, 1.0, 0.1, 10.0);  // fovy, aspect (w/h), near, far  (near far are clipping)

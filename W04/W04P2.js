@@ -8,7 +8,7 @@
 
 
 var pointsArray = [];
-var numTimesToSubdivide = 1;
+var numTimesToSubdivide = 5;
 
 
 window.onload = function init() {
@@ -21,6 +21,9 @@ window.onload = function init() {
     let program = initShaders(gl, "vertex-shader", "fragment-shader");
     gl.useProgram(program);
     gl.program = program;
+
+    gl.enable( gl.Cull_FACE );  // Add culling for closed 3D objects, that only draws when facing the camera using positive dot product
+    gl.enable( gl.DEPTH_TEST );  // Add depth test
 
     
     var ext = gl.getExtension('OES_element_index_uint');
@@ -86,8 +89,7 @@ function triangle(a, b, c) {
 
 
 function render(gl) {
-    gl.enable( gl.Cull_FACE );  // Add culling for closed 3D objects, that only draws when facing the camera using positive dot product
-    gl.enable(gl.DEPTH_TEST);  // Add depth test
+
     gl.clearColor(0.3921, 0.5843, 0.9294, 1.0)
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);  // Add depth buffer bit
 
@@ -106,7 +108,7 @@ function render(gl) {
     let M = mat4();
 
     // View
-    let V = lookAt(vec3(0.5, 0.5, -4.5), vec3(0.5, 0.5, 0.0), vec3(0.0, 1.0, 0.0));  // eye, at, look_up
+    let V = lookAt(vec3(0, 0, -4.5), vec3(0, 0, 0.0), vec3(0.0, 1.0, 0.0));  // eye, at, look_up
 
     // Perspective projection
     let P = perspective(45.0, 1.0, 0.1, 10.0);  // fovy, aspect (w/h), near, far  (near far are clipping)
