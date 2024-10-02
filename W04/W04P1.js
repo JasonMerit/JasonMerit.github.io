@@ -1,6 +1,11 @@
 // Copy tetrahedron code from book [3]
 // No delete buffer [4]
 // Check wiki on code mistakes in book
+// Middle sphere is correctly colored [8]
+// Remember to also model multiply the normals[11]
+// half vector is wi + w0 normalized angle to light and observation [14]
+// To keep consistent across world and eye space, compute the normal matrix as N = (M^T)^-1, where M is just some matrix [15]
+
 
 window.onload = function init() {
     let canvas = document.getElementById( "gl-canvas" );
@@ -48,18 +53,18 @@ window.onload = function init() {
     ]);
     
     // Triangle mesh indices
-    // var indices = new Uint32Array([
-    //     1, 0, 3, 3, 2, 1, // front
-    //     2, 3, 7, 7, 6, 2, // right
-    //     3, 0, 4, 4, 7, 3, // down
-    //     6, 5, 1, 1, 2, 6, // up
-    //     4, 5, 6, 6, 7, 4, // back
-    //     5, 4, 0, 0, 1, 5, // left
-    // ]);
+    var indices = new Uint32Array([
+        1, 0, 3, 3, 2, 1, // front
+        2, 3, 7, 7, 6, 2, // right
+        3, 0, 4, 4, 7, 3, // down
+        6, 5, 1, 1, 2, 6, // up
+        4, 5, 6, 6, 7, 4, // back
+        5, 4, 0, 0, 1, 5, // left
+    ]);
     
     var iBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(wire_indices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(indices), gl.STATIC_DRAW);
     var vBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
@@ -74,15 +79,36 @@ window.onload = function init() {
     // View
     let V = lookAt(vec3(0.5, 0.5, -4.5), vec3(0.5, 0.5, 0.0), vec3(0.0, 1.0, 0.0));  // eye, at, look_up
     
-    render(gl, wire_indices.length, V, P);
+
+    // Week 4
+    // tetrahedron(va, vb, vc, vd, numTimesToSubdivide);
+
+    render(gl, indices.length, V, P);
     
 }   
 
+// function tetrahedron(a, b, c, d, n) {
+//     divideTriangle(a, b, c, n);
+//     divideTriangle(d, c, b, n);
+//     divideTriangle(a, d, b, n);
+//     divideTriangle(a, c, d, n);
+// }
+
+// function triangle(a, b, c){
+//     pointsArray.push(a);
+//     pointsArray.push(a);
+//     pointsArray.push(a);
+//     index += 3;
+// }
+
+
+
 function render(gl, num_points, V, P) {
-    gl.enable( gl.Cull_FACE );  // Add culling for closed 3D objects, that only draws when facing the camera using positive dot product
-    gl.enable(gl.DEPTH_TEST);  // Add depth test
+    // gl.enable( gl.Cull_FACE );  // Add culling for closed 3D objects, that only draws when facing the camera using positive dot product
+    // gl.enable(gl.DEPTH_TEST);  // Add depth test
     gl.clearColor(0.3921, 0.5843, 0.9294, 1.0)
-    gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);  // Add depth buffer bit
+    gl.clear( gl.COLOR_BUFFER_BIT);  // Add depth buffer bit
+    // gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);  // Add depth buffer bit
 
     // Model
     let M = mat4();
@@ -92,20 +118,7 @@ function render(gl, num_points, V, P) {
     let mvp = gl.getUniformLocation(gl.program, "MVP");
     gl.uniformMatrix4fv(mvp, false, flatten(MVP));
 
-    gl.drawElements(gl.LINES, num_points, gl.UNSIGNED_INT, 0);
+    gl.drawElements(gl.TRIANGLES, num_points, gl.UNSIGNED_INT, 0);
 
-    // Second cube two-point by x-Translation
-    M = translate(1.2, 0.0, 0.0);
-    MVP = mult(mult(P, V), M);
-    gl.uniformMatrix4fv(mvp, false, flatten(MVP));
-
-    gl.drawElements(gl.LINES, num_points, gl.UNSIGNED_INT, 0);
-
-    // Third cube three-point by x- and y-Translation
-    M = translate(1.2, -1.2, 0.0);
-    MVP = mult(mult(P, V), M);
-    gl.uniformMatrix4fv(mvp, false, flatten(MVP));
-
-    gl.drawElements(gl.LINES, num_points, gl.UNSIGNED_INT, 0);
     
 }
