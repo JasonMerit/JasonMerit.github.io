@@ -65,9 +65,14 @@ window.onload = function init() {
     
     // gl.vertexAttribPointer(lightPosition, 4, gl.FLOAT, false, 0, 0);
     // gl.enableVertexAttribArray(lightPosition);
-    let v = vec4(0.0, 0.0, -1.0, 0.0);
+    let v = vec4(0.0, -1.0, -1.0, 0.0);
     gl.uniform4fv(gl.getUniformLocation(program, "lightPos"), flatten(v));
-
+    let k = vec4(0.6, 0.6, 0.6, 1.0);  // Ligh from all directions
+    gl.uniform4fv(gl.getUniformLocation(program, "La"), flatten(k));
+    let t = vec4(1.0, 1.0, 1.0, 1.0);  // Ligh from source 
+    gl.uniform4fv(gl.getUniformLocation(program, "Le"), flatten(t));
+    let kek = 1.0;
+    gl.uniform1f(gl.getUniformLocation(program, "kd"), kek);
     // let lightEmmision = gl.getUniformLocation(program, "lightEmiss");
     // gl.vertexAttribPointer(lightPosition, 4, gl.FLOAT, false, 0, 0);
     // gl.enableVertexAttribArray(lightPosition);
