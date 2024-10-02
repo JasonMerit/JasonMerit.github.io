@@ -1,0 +1,39 @@
+<html>
+<script id="vertex-shader" type="x-shader/x-vertex">
+    attribute vec4 vPosition;
+    // attribute vec4 vNormal;
+    uniform mat4 MVP;
+    attribute vec4 a_color;  // Receive color from js
+    varying vec4 v_color;  // Send color to fragment shader
+    void main() {
+        gl_Position = MVP * vPosition;
+        n = vPosition;
+        n.w = 0.0;
+        v_color = a_color;
+    }
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+    precision mediump float;
+    varying vec4 v_color;
+    void main() {
+        gl_FragColor = 0.5*v_color + 0.5;
+    }
+</script>
+
+<script type="text/javascript" src="../angelCommon/webgl-utils.js"></script>
+<script type="text/javascript" src="../angelCommon/initShaders.js"></script>
+<script type="text/javascript" src="../angelCommon/MV.js"></script>
+<script type="text/javascript" src="W04P2.js"></script>
+<body>
+<canvas id="gl-canvas" width="512" height="512">
+<!-- The following message is displayed if the browser doesn’t
+-- support HTML5 -->
+Sorry; your web browser does not support HTML5's canvas element.
+</canvas>
+<button id="SubdivideButton+">Increase subdivision</button>
+<button id="SubdivideButton-">Decrease subdivision</button>
+</body>
+</html>
+
+
