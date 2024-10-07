@@ -43,7 +43,7 @@ window.onload = function init() {
         
     document.getElementById("SubdivideButton-").onclick =
         function() { 
-            numTimesToSubdivide = Math.max(numTimesToSubdivide - 1, 1); 
+            numTimesToSubdivide = Math.max(numTimesToSubdivide - 1, 0); 
             // Empty the pointsArray
             pointsArray = [];
             tetrahedron(va, vb, vc, vd, numTimesToSubdivide);
@@ -63,31 +63,24 @@ window.onload = function init() {
     gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vColor);
     
-    // gl.vertexAttribPointer(lightPosition, 4, gl.FLOAT, false, 0, 0);
-    // gl.enableVertexAttribArray(lightPosition);
-    let v = vec4(0.0, -1.0, -1.0, 0.0);
-    gl.uniform4fv(gl.getUniformLocation(program, "lightPos"), flatten(v));
-    let k = vec4(0.6, 0.6, 0.6, 1.0);  // Ligh from all directions
-    gl.uniform4fv(gl.getUniformLocation(program, "La"), flatten(k));
-    let t = vec4(1.0, 1.0, 1.0, 1.0);  // Ligh from source 
-    gl.uniform4fv(gl.getUniformLocation(program, "Le"), flatten(t));
+    // Source lighting
+    gl.uniform4fv(gl.getUniformLocation(program, "lightPos"), [0.0, -1.0, -1.0, 0.0]);
+    // Ambient ligthing (all directions)
     let kek = 1.0;
-    gl.uniform1f(gl.getUniformLocation(program, "kd"), kek);
-    // let lightEmmision = gl.getUniformLocation(program, "lightEmiss");
-    // gl.vertexAttribPointer(lightPosition, 4, gl.FLOAT, false, 0, 0);
-    // gl.enableVertexAttribArray(lightPosition);
-    // gl.vertexAttrib4f(lightPosition, 0.0, 0.0, -1.0, 0.0);
-
-    // let diffuse_reflection_coefficient = gl.getUniformLocation(program, "kd");
-    // gl.vertexAttribPointer(diffuse_reflection_coefficient, 1, gl.FLOAT, false, 0, 0);
-    // gl.enableVertexAttribArray(diffuse_reflection_coefficient);
-    // gl.uniform1f(diffuse_reflection_coefficient, 1.0);
+    gl.uniform4fv(gl.getUniformLocation(program, "La"), [kek, kek, kek, 1.0]);
+    // Emission light 
+    kek = 1.0 - kek;
+    gl.uniform4fv(gl.getUniformLocation(program, "Le"), [kek, kek, kek, 1.0]);
+    // Diffuse reflection coefficient
+    gl.uniform1f(gl.getUniformLocation(program, "kd"), 1.0);
+    // Specular reflection coefficient
+    gl.uniform1f(gl.getUniformLocation(program, "ks"), 1.0);
+    // Shininess coefficient
+    gl.uniform1f(gl.getUniformLocation(program, "s"), 1.0);
 
     render(gl);
     
 }   
-
-
 
 function tetrahedron(a, b, c, d, n) {
     divideTriangle(a, b, c, n);
@@ -132,8 +125,6 @@ function render(gl) {
     tetrahedron(va, vb, vc, vd, numTimesToSubdivide);
     gl.bufferData(gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW);
 
-    // Model
-    let M = mat4();
 
     // View
     theta += 0.05;
@@ -142,11 +133,9 @@ function render(gl) {
 
     // Perspective projection
     let P = perspective(45.0, 1.0, 0.1, 10.0);  // fovy, aspect (w/h), near, far  (near far are clipping)
-
     
-    let MVP = mult(mult(P, V), M);
     let mvp = gl.getUniformLocation(gl.program, "MVP");
-    gl.uniformMatrix4fv(mvp, false, flatten(MVP));
+    gl.uniformMatrix4fv(mvp, false, flatten(mult(P, V)));
 
     gl.drawArrays(gl.TRIANGLES, 0, pointsArray.length);
 
