@@ -1,12 +1,12 @@
 <html>
 <script id="vertex-shader" type="x-shader/x-vertex">
     attribute vec4 vPosition;
-    uniform mat4 MVP;
+    uniform mat4 perspective;
 
     varying vec2 fTexCoord;
     attribute vec2 vTexCord;
     void main() {
-        gl_Position = MVP * vPosition;
+        gl_Position = perspective * vPosition;
         fTexCoord = vTexCord;
     }
 </script>

@@ -9,9 +9,6 @@
 
 
 var pointsArray = [];
-var numTimesToSubdivide = 1;
-
-
 
 window.onload = function init() {
     let canvas = document.getElementById( "gl-canvas" );
@@ -101,21 +98,10 @@ function render(gl) {
     gl.clearColor(0.3921, 0.5843, 0.9294, 1.0)
     gl.clear( gl.COLOR_BUFFER_BIT );
 
-    // Model
-    let M = mat4();
-
-    // View
-    //let V = lookAt(vec3(0, 0, -4.5), vec3(0, 0, 0.0), vec3(0.0, 1.0, 0.0));  // eye, at, look_up
-    let V = mat4();
-
     // Perspective projection
     let P = perspective(90.0, 1.0, 0.1, 30.0);  // fovy, aspect (w/h), near, far  (near far are clipping)
-
-    
-    // First cube one-point
-    let MVP = mult(mult(P, V), M);
-    let mvp = gl.getUniformLocation(gl.program, "MVP");
-    gl.uniformMatrix4fv(mvp, false, flatten(MVP));
+    let p = gl.getUniformLocation(gl.program, "perspective");
+    gl.uniformMatrix4fv(p, false, flatten(P));
 
     gl.drawArrays(gl.TRIANGLES, 0, pointsArray.length);
 
