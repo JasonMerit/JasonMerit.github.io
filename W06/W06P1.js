@@ -33,11 +33,43 @@ window.onload = function init() {
     var vPosition = gl.getAttribLocation(program, "vPosition");
     gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vPosition);
+
+    // Rect with vertices (−4, −1, −1), (4, −1, −1), (4, −1, −21), (−4, −1, −21)
+    // And texture coordinates (−1.5, 0), (2.5, 0), (2.5, 10), (−1.5, 10)
+    pointsArray = [
+        vec4(-4, -1, -1, 1), 
+        vec4(4, -1, -1, 1),  
+        vec4(4, -1, -21, 1),  
+        vec4(-4, -1, -1, 1), 
+        vec4(4, -1, -21, 1), 
+        vec4(-4, -1, -21, 1), 
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW);
+
+    // Texture coordinates
+    let texCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
     
+    let tex_coords = [
+        vec2(-1.5, 0),
+        vec2(2.5, 0),
+        vec2(2.5, 10),
+        vec2(-1.5, 0),
+        vec2(2.5, 10),
+        vec2(-1.5, 10),
+    ]
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(tex_coords), gl.STATIC_DRAW);
+
+    var kek = gl.getAttribLocation(program, "vTexCord");
+    gl.vertexAttribPointer(kek, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(kek);
 
     // Texture
     let texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
+    let sampler = gl.getUniformLocation(gl.program, "texMap");  // Set sampler2D to 0
+    gl.uniform1i(sampler, 0);
+
     
     // Checkboard
     let texSize = 64;
@@ -57,25 +89,10 @@ window.onload = function init() {
         }
     
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, texSize, texSize, 0, gl.RGBA, gl.UNSIGNED_BYTE, myTexels);
-    
-        
-    // Rect with vertices (−4, −1, −1), (4, −1, −1), (4, −1, −21), (−4, −1, −21)
-    pointsArray = [
-        vec4(-4, -1, -1, 1),
-        vec4(4, -1, -1, 1),
-        vec4(4, -1, -21, 1),
-        vec4(4, -1, -1, 1),
-        vec4(4, -1, -21, 1),
-        vec4(-4, -1, -21, 1),
-    ];
-    // Send data to GPU
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW);
-    
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     
     render(gl);
 }   
-
-
 
 function render(gl) {
     gl.clearColor(0.3921, 0.5843, 0.9294, 1.0)
@@ -89,7 +106,7 @@ function render(gl) {
     let V = mat4();
 
     // Perspective projection
-    let P = perspective(90.0, 1.0, 0.1, 10.0);  // fovy, aspect (w/h), near, far  (near far are clipping)
+    let P = perspective(90.0, 1.0, 0.1, 30.0);  // fovy, aspect (w/h), near, far  (near far are clipping)
 
     
     // First cube one-point
