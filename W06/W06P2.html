@@ -1,0 +1,49 @@
+<html>
+<script id="vertex-shader" type="x-shader/x-vertex">
+    attribute vec4 vPosition;
+    uniform mat4 perspective;
+
+    varying vec2 fTexCoord;
+    attribute vec2 vTexCord;
+    void main() {
+        gl_Position = perspective * vPosition;
+        fTexCoord = vTexCord;
+    }
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+    precision mediump float;
+    uniform sampler2D texMap;
+    varying vec2 fTexCoord;
+    void main() {
+        gl_FragColor = texture2D(texMap, fTexCoord);
+        //gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+    }
+</script>
+
+<script type="text/javascript" src="../angelCommon/webgl-utils.js"></script>
+<script type="text/javascript" src="../angelCommon/initShaders.js"></script>
+<script type="text/javascript" src="../angelCommon/MV.js"></script>
+<script type="text/javascript" src="W06P2.js"></script>
+<body>
+<canvas id="gl-canvas" width="512" height="512">
+<!-- The following message is displayed if the browser doesn’t
+-- support HTML5 -->
+Sorry; your web browser does not support HTML5's canvas element.
+</canvas>
+<select id=wrappingMenu size="6">
+    <option selected>Nearest</option>
+    <option>Linear</option>
+    <option>Nearest mipmap nearest</option>
+    <option>Linear mipmap nearest</option>
+    <option>Nearest mipmap linear</option>
+    <option>Linear mipmap linear</option>
+</select>
+<select id=wrappingMenu size="2">
+    <option selected>Repeat</option>
+    <option>Clamp to edge</option>
+</select>
+</body>
+</html>
+
+
