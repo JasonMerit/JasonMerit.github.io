@@ -86,10 +86,38 @@ window.onload = function init() {
         }
     
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, texSize, texSize, 0, gl.RGBA, gl.UNSIGNED_BYTE, myTexels);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    gl.generateMipmap(gl.TEXTURE_2D);
+
+    // Selecting wrapping
+    let WRAPS = [gl.REPEAT, gl.CLAMP_TO_EDGE];
+    let wrappingMenu = document.getElementById("wrappingMenu");
+    wrappingMenu.addEventListener("change", function() {
+        let setting = WRAPS[wrappingMenu.selectedIndex];
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, setting);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, setting);
+        render(gl);
+    })
+
+    // Selecting filtering
+    let FILTERS = [gl.NEAREST, gl.LINEAR, gl.NEAREST_MIPMAP_NEAREST, gl.LINEAR_MIPMAP_NEAREST, gl.NEAREST_MIPMAP_LINEAR, gl.LINEAR_MIPMAP_LINEAR];
+
+    let minificationMenu = document.getElementById("minificationMenu");
+    minificationMenu.addEventListener("change", function() {
+        let setting = FILTERS[minificationMenu.selectedIndex];
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, setting);
+        render(gl);
+    })
+
+    let magnificationMenu = document.getElementById("magnificationMenu");
+    magnificationMenu.addEventListener("change", function() {
+        let setting = FILTERS[magnificationMenu.selectedIndex];
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, setting);
+        render(gl);
+    })
     
     render(gl);
 }   
@@ -107,3 +135,4 @@ function render(gl) {
 
     
 }
+

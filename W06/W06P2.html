@@ -31,7 +31,7 @@
 -- support HTML5 -->
 Sorry; your web browser does not support HTML5's canvas element.
 </canvas>
-<select id=wrappingMenu size="6">
+<select id=minificationMenu size="6">
     <option selected>Nearest</option>
     <option>Linear</option>
     <option>Nearest mipmap nearest</option>
@@ -39,10 +39,20 @@ Sorry; your web browser does not support HTML5's canvas element.
     <option>Nearest mipmap linear</option>
     <option>Linear mipmap linear</option>
 </select>
+<select id=magnificationMenu size="2">
+    <option selected>Nearest</option>
+    <option>Linear</option>
+</select>
 <select id=wrappingMenu size="2">
     <option selected>Repeat</option>
     <option>Clamp to edge</option>
 </select>
+<body>
+    <h1>W03P3</h1>
+<text>
+    Nearest takes the nearest pixel to the texture coordinate
+    Linear takes the weighted average of the four pixels closest to the texture coordinate and is thus blurry
+    Mipmap uses boxfiltering to recursively reduce the texture until 1 pixel is left
 </body>
 </html>
 
