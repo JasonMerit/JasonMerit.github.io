@@ -3,7 +3,8 @@
     attribute vec4 vPosition;
     attribute vec4 aColor;  // Receive color from js
     uniform mat4 MVP;
-    const float V = 1.0;
+    uniform mat4 V;
+    const float Vc = 1.0;
 
     varying vec4 v_color;  // Send color to fragment shader
 
@@ -19,19 +20,20 @@
     
     void main() {
         gl_Position = MVP * vPosition;
-        vec4 Li = V * Le;  // Incident light
+        vec4 Li = Vc * Le;  // Incident light
 
-        vec4 n = vPosition;
+        vec4 n = V * vPosition;
         n.w = 0.0;
+        vec4 light = V * lightPos;
         
-        vec3 w_i = lightPos.w == 0.0 ? normalize(-lightPos.xyz) : normalize(lightPos.xyz - vPosition.xyz);
-        
+        vec3 w_i = light.w == 0.0 ? normalize(-light.xyz) : normalize(light.xyz - vPosition.xyz);
         vec4 Lrd = kd * Li * max(dot(n.xyz, w_i), 0.0);
-        vec3 wr = 2.0 * dot(n.xyz, w_i) * n.xyz - w_i;
-        vec3 wo = normalize(-vPosition.xyz);  // Observer
-        vec4 LPrs = ks * Li * pow(max(dot(wr, wo), 0.0), s);
+        vec3 w_r = 2.0 * dot(n.xyz, w_i) * n.xyz - w_i;
+        //vec3 w_o = normalize(-vPosition.xyz);  // Observer
+        vec3 w_o = -normalize((V*vPosition).xyz);
+        vec4 LPrs = ks * Li * pow(max(dot(w_r, w_o), 0.0), s);
         vec4 Lo = Lrd + LPrs + kd * La;
-        Lo = LPrs;
+        //Lo = LPrs;
         Lo.a = 1.0;
         
         v_color = Lo * (0.5*aColor+0.5);

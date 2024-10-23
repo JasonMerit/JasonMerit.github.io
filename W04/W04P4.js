@@ -137,6 +137,9 @@ function render(gl) {
     let mvp = gl.getUniformLocation(gl.program, "MVP");
     gl.uniformMatrix4fv(mvp, false, flatten(mult(P, V)));
 
+    let v = gl.getUniformLocation(gl.program, "V");
+    gl.uniformMatrix4fv(v, false, flatten(V));
+
     gl.drawArrays(gl.TRIANGLES, 0, pointsArray.length);
 
     requestAnimationFrame(() => {render(gl)})
