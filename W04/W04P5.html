@@ -25,10 +25,10 @@
         vec4 n = vPosition;
         n.w = 0.0;
         vec4 light = lightPos;
-        
+
         vec3 to_light = light.w == 0.0 ? normalize(-light.xyz) : normalize(light.xyz - vPosition.xyz);  // w_i
         vec4 reflected = diffuse_coef * incident_light * max(dot(n.xyz, to_light), 0.0);  // reflected Lr,d
-        
+
         vec3 wr = 2.0 * dot(n.xyz, to_light) * n.xyz - to_light;  // w_r
         vec4 phong = specular * incident_light * pow(max(dot(wr, observer), 0.0), shininess);  // Lr,s (Phong)
 
@@ -51,7 +51,7 @@
 <script type="text/javascript" src="../angelCommon/webgl-utils.js"></script>
 <script type="text/javascript" src="../angelCommon/initShaders.js"></script>
 <script type="text/javascript" src="../angelCommon/MV.js"></script>
-<script type="text/javascript" src="W04P4.js"></script>
+<script type="text/javascript" src="W04P5.js"></script>
 <body>
 <canvas id="gl-canvas" width="512" height="512">
 <!-- The following message is displayed if the browser doesn’t

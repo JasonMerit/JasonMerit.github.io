@@ -64,8 +64,7 @@ window.onload = function init() {
     // Texture
     let texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    let sampler = gl.getUniformLocation(gl.program, "texMap");  // Set sampler2D to 0
-    gl.uniform1i(sampler, 0);
+    gl.uniform1i(gl.getUniformLocation(gl.program, "texMap"), 0); // Set sampler2D to 0
 
     
     // Checkboard
@@ -86,7 +85,7 @@ window.onload = function init() {
         }
     
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, texSize, texSize, 0, gl.RGBA, gl.UNSIGNED_BYTE, myTexels);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
@@ -136,3 +135,5 @@ function render(gl) {
     
 }
 
+// EXPLAINATION
+// Filt
