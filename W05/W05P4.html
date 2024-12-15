@@ -1,0 +1,92 @@
+<html>
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        attribute vec4 vPosition;
+        attribute vec4 a_Color; 
+        attribute vec4 a_Normal;
+        uniform mat4 MVP;
+
+
+        varying vec3 normal;
+
+        void main() {
+            gl_Position = MVP * vPosition;
+            normal = normalize((vec4(a_Normal.xyz,0.0)).xyz);
+        }
+    </script>
+    
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        varying vec4 vColor;
+
+        const vec4 lightPos = vec4(0.0, 0.0, -1.0, 0.0);     
+        uniform vec3 observer;
+        uniform vec4 ambient;      
+        uniform vec4 emission;     
+        uniform float diffuse_coef;
+        uniform float spec;    
+        uniform float shininess;   
+
+        varying vec3 normal;
+        
+        void main() {
+          vec4 n_ = normalize(vec4(normal, 0.0)); // Normal vector
+          vec4 light = vec4(0.0, 0.0, -1.0, 0.0);
+          vec3 to_light = light.w == 0.0 ? normalize(-light.xyz) : normalize(light.xyz - n_.xyz);  // w_i
+          
+          vec4 diffuse = diffuse_coef * emission * max(dot(n_.xyz, to_light), 0.0);  // reflected Lr,d
+          vec4 ambience = ambient * emission;  // Lr,a
+    
+          vec3 wr = 2.0 * dot(n_.xyz, to_light) * n_.xyz - to_light;  // w_r
+          vec4 specular = spec * emission * pow(max(dot(wr, observer), 0.0), shininess);  // Lr,s (specular)
+    
+          // Perform a back-face lighting test
+            if (dot(n_.xyz, to_light) <= 0.0) {
+                specular = vec4(0.0); // No spec if light is behind the surface
+            }
+    
+          gl_FragColor = diffuse + ambience + specular;  // Lr
+        }
+    </script>
+
+
+<script type="text/javascript" src="../angelCommon/webgl-utils.js"></script>
+<script type="text/javascript" src="../angelCommon/initShaders.js"></script>
+<script type="text/javascript" src="../angelCommon/MV.js"></script>
+<script type="text/javascript" src="W05P4.js"></script>
+<body>
+<canvas id="gl-canvas" width="512" height="512">
+<!-- The following message is displayed if the browser doesn’t
+-- support HTML5 -->
+Sorry; your web browser does not support HTML5's canvas element.
+</canvas>
+</div>
+<div>
+  <input type="range" id="Kd" name="Kd" min="0" max="1" value="0.9" step="0.01" />
+  Kd (diffuse)
+</div>
+<div>
+  <input type="range" id="Ks" name="Ks" min="0" max="1" value="1.0"step="0.01" />
+  Ks (specular)
+</div>
+<div>
+  <input type="range" id="s" name="s" min="1" max="1000" value="100"step="0.01" />
+  s (shininess)
+</div>
+<div>
+  <input type="range" id="Le" name="Le" min="0" max="2.0" value="1.0"step="0.01" />
+  Le (emission)
+</div>
+<div>
+  <input type="range" id="La" name="La" min="0" max="1" value="0.1"step="0.01" />
+  La (ambient)
+</div>
+<div>
+  To shade the doggy the normals are obtained from the normalBuffer. These are used in Phong shading as the intensity depends on the angle of reflection.  
+</div>
+<div>
+  By interpolating between the vertex normals, the shading is smooth and the doggy looks more realistic.
+</div>
+</body>
+</html>
+
+
