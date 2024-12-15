@@ -1,4 +1,6 @@
 <html>
+    <h1>W06P2</h1>
+
 <script id="vertex-shader" type="x-shader/x-vertex">
     attribute vec4 vPosition;
     uniform mat4 perspective;
@@ -47,11 +49,15 @@ Sorry; your web browser does not support HTML5's canvas element.
     <option>Clamp to edge</option>
 </select>
 <body>
-    <h1>W03P3</h1>
-<text>
-    Nearest takes the nearest pixel to the texture coordinate
+Nearest takes the nearest pixel to the texture coordinate.
+<div>
     Linear takes the weighted average of the four pixels closest to the texture coordinate and is thus blurry
+</div>
+<div>
     Mipmap uses boxfiltering to recursively reduce the texture until 1 pixel is left
+</div>
+    
+</text>
 </body>
 </html>
 
