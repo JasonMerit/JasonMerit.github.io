@@ -105,11 +105,8 @@ window.onload = function init() {
     gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vPosition);
 
-    // let vColor = gl.getAttribLocation(program, "aColor");
-    // gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 0, 0);
-    // gl.enableVertexAttribArray(vColor);
-    
-
+    // Create sphere using Tetrahedron
+    tetrahedron(va, vb, vc, vd, numTimesToSubdivide);
     render(gl);
     
 }   
@@ -145,15 +142,7 @@ function render(gl) {
 
     gl.clearColor(0.3921, 0.5843, 0.9294, 1.0)
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);  // Add depth buffer bit
-
-    // Create sphere using Tetrahedron
-    
-    
-    // Empty the pointsArray
-    pointsArray = [];
-    tetrahedron(va, vb, vc, vd, numTimesToSubdivide);
     gl.bufferData(gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW);
-
 
     // View
     theta += speed;

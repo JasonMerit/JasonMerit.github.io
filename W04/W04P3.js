@@ -63,8 +63,6 @@ window.onload = function init() {
     gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vColor);
     
-    // gl.vertexAttribPointer(lightPosition, 4, gl.FLOAT, false, 0, 0);
-    // gl.enableVertexAttribArray(lightPosition);
     let v = vec4(0.0, -1.0, -1.0, 0.0);
     gl.uniform4fv(gl.getUniformLocation(program, "lightPos"), flatten(v));
     let k = vec4(0.6, 0.6, 0.6, 1.0);  // Ligh from all directions
@@ -73,16 +71,15 @@ window.onload = function init() {
     gl.uniform4fv(gl.getUniformLocation(program, "Le"), flatten(t));
     let kek = 1.0;
     gl.uniform1f(gl.getUniformLocation(program, "kd"), kek);
-    // let lightEmmision = gl.getUniformLocation(program, "lightEmiss");
-    // gl.vertexAttribPointer(lightPosition, 4, gl.FLOAT, false, 0, 0);
-    // gl.enableVertexAttribArray(lightPosition);
-    // gl.vertexAttrib4f(lightPosition, 0.0, 0.0, -1.0, 0.0);
 
-    // let diffuse_reflection_coefficient = gl.getUniformLocation(program, "kd");
-    // gl.vertexAttribPointer(diffuse_reflection_coefficient, 1, gl.FLOAT, false, 0, 0);
-    // gl.enableVertexAttribArray(diffuse_reflection_coefficient);
-    // gl.uniform1f(diffuse_reflection_coefficient, 1.0);
-
+    var va = vec4(0.0, 0.0, 1.0, 1);
+    var vb = vec4(0.0, 0.942809, -0.333333, 1);
+    var vc = vec4(-0.816497, -0.471405, -0.333333, 1);
+    var vd = vec4(0.816497, -0.471405, -0.333333, 1);
+    
+    // Empty the pointsArray
+    tetrahedron(va, vb, vc, vd, numTimesToSubdivide);
+    
     render(gl);
     
 }   
@@ -121,16 +118,8 @@ function render(gl) {
     gl.clearColor(0.3921, 0.5843, 0.9294, 1.0)
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);  // Add depth buffer bit
 
-    // Create sphere using Tetrahedron
-    var va = vec4(0.0, 0.0, 1.0, 1);
-    var vb = vec4(0.0, 0.942809, -0.333333, 1);
-    var vc = vec4(-0.816497, -0.471405, -0.333333, 1);
-    var vd = vec4(0.816497, -0.471405, -0.333333, 1);
-    
-    // Empty the pointsArray
-    pointsArray = [];
-    tetrahedron(va, vb, vc, vd, numTimesToSubdivide);
     gl.bufferData(gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW);
+    gl.drawArrays(gl.TRIANGLES, 0, pointsArray.length);
 
     // Model
     let M = mat4();
@@ -147,8 +136,6 @@ function render(gl) {
     let MVP = mult(mult(P, V), M);
     let mvp = gl.getUniformLocation(gl.program, "MVP");
     gl.uniformMatrix4fv(mvp, false, flatten(MVP));
-
-    gl.drawArrays(gl.TRIANGLES, 0, pointsArray.length);
 
     requestAnimationFrame(() => {render(gl)})
 
