@@ -1,52 +1,52 @@
 <html>
 <script id="vertex-shader" type="x-shader/x-vertex">
-    attribute vec4 vPosition;
-    // attribute vec4 aColor;  // Receive color from js
-    uniform mat4 MVP;
-    uniform mat4 V;
-    vec3 observer = vec3(0.0,0.0,1.0);
-    const float visibility = 1.0;
+  attribute vec4 vPosition; 
+  uniform mat4 MVP;         
 
-    varying vec4 v_color;  // Send color to fragment shader
+  varying vec3 fragPosition;
 
-    uniform vec4 lightPos;
-    uniform float diffuse_coef;  // kd
-    uniform vec4 ambient; // La
-    uniform vec4 emission; // Le
+  void main() {
+      gl_Position = MVP * vPosition;
+      fragPosition = vPosition.xyz;
+  }
 
-    //Phong parameters
-    uniform float specular; // ks
-    uniform float shininess; // s
-    
-    void main() {
-        gl_Position = MVP * vPosition;
-        vec4 incident_light = visibility * emission;  // Incident light Li
-
-        vec4 n = vPosition;
-        n.w = 0.0;
-        vec4 light = lightPos;
-
-        vec3 to_light = light.w == 0.0 ? normalize(-light.xyz) : normalize(light.xyz - vPosition.xyz);  // w_i
-        vec4 reflected = diffuse_coef * incident_light * max(dot(n.xyz, to_light), 0.0);  // reflected Lr,d
-
-        vec3 wr = 2.0 * dot(n.xyz, to_light) * n.xyz - to_light;  // w_r
-        vec4 phong = specular * incident_light * pow(max(dot(wr, observer), 0.0), shininess);  // Lr,s (Phong)
-
-        // vec3 omega_h = normalize(to_light + observer);  // w_h
-        // vec4 blinn_phong = specular * incident_light * pow(max(dot(n.xyz, omega_h), 0.0), shininess);  // Lr,s (BP)
-
-        v_color = reflected + phong + diffuse_coef * ambient;  // Lr
-        
-    }
 </script>
 
 <script id="fragment-shader" type="x-shader/x-fragment">
-    precision mediump float;
-    varying vec4 v_color;
-    void main() {
-        gl_FragColor = v_color;
-    }
+  precision mediump float;
+
+  varying vec3 fragPosition; 
+
+  uniform vec4 lightPos;     
+  uniform vec3 observer;
+  uniform vec4 ambient;      
+  uniform vec4 emission;     
+  uniform float diffuse_coef;
+  uniform float spec;    
+  uniform float shininess;   
+  vec4 material = vec4(0.6, 0.0, 0.0, 1.0);
+
+  void main() {
+      vec4 n_ = normalize(vec4(fragPosition, 0.0)); // Normal vector
+      vec4 light = vec4(0.0, 0.0, -1.0, 0.0);
+      vec3 to_light = light.w == 0.0 ? normalize(-light.xyz) : normalize(light.xyz - n_.xyz);  // w_i
+      
+      vec4 diffuse = diffuse_coef * emission * max(dot(n_.xyz, to_light), 0.0);  // reflected Lr,d
+      vec4 ambience = ambient * emission;  // Lr,a
+
+      vec3 wr = 2.0 * dot(n_.xyz, to_light) * n_.xyz - to_light;  // w_r
+      vec4 specular = spec * emission * pow(max(dot(wr, observer), 0.0), shininess);  // Lr,s (specular)
+
+      // Perform a back-face lighting test
+        if (dot(n_.xyz, to_light) <= 0.0) {
+            specular = vec4(0.0); // No spec if light is behind the surface
+        }
+
+      gl_FragColor = (diffuse + ambience) * material + specular;  // Lr
+  }
 </script>
+
+
 
 <script type="text/javascript" src="../angelCommon/webgl-utils.js"></script>
 <script type="text/javascript" src="../angelCommon/initShaders.js"></script>

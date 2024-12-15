@@ -1,17 +1,22 @@
 <html>
-<script id="vertex-shader" type="x-shader/x-vertex">
-    attribute vec4 vPosition;
-    uniform mat4 MVP;
-    void main() {
-        gl_Position = MVP * vPosition;
-    }
-</script>
-
-<script id="fragment-shader" type="x-shader/x-fragment">
-    void main() {
-    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-    }
-</script>
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        attribute vec4 vPosition;
+        uniform mat4 MVP;
+        varying vec4 v_color;  // Send color to fragment shader
+        void main() {
+            gl_Position = MVP * vPosition;
+            v_color = vPosition;
+        }
+    </script>
+    
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        varying vec4 v_color;
+        void main() {
+            // gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+            gl_FragColor = 0.5*v_color + 0.5;
+        }
+    </script>
 
 <script type="text/javascript" src="../angelCommon/webgl-utils.js"></script>
 <script type="text/javascript" src="../angelCommon/initShaders.js"></script>

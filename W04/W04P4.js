@@ -68,9 +68,9 @@ window.onload = function init() {
         function(event) { gl.uniform1f(gl.getUniformLocation(program, "diffuse_coef"), event.srcElement.value); }
     
     // Specular coefficient (Ks)
-    gl.uniform1f(gl.getUniformLocation(program, "specular"), 1.0);
+    gl.uniform1f(gl.getUniformLocation(program, "spec"), 1.0);
     document.getElementById("Ks").oninput = 
-        function(event) { gl.uniform1f(gl.getUniformLocation(program, "ks"), event.srcElement.value); }
+        function(event) { gl.uniform1f(gl.getUniformLocation(program, "spec"), event.srcElement.value); }
     
     // Shininess coefficient (s)
     gl.uniform1f(gl.getUniformLocation(program, "shininess"), 100);
@@ -85,9 +85,11 @@ window.onload = function init() {
             gl.uniform4fv(gl.getUniformLocation(program, "emission"), [val, val, val, 1.0]); }
     
     // Ambient light intensity (La)
-    gl.uniform4fv(gl.getUniformLocation(program, "ambient"), [0.4, 0.0, 0.0, 1.0]);
+    gl.uniform4fv(gl.getUniformLocation(program, "ambient"), [0.1, 0.1, 0.1, 1.0]);
     document.getElementById("La").oninput = 
-        function(event) { gl.uniform4fv(gl.getUniformLocation(program, "ambient"), [event.srcElement.value, 0.0, 0.0, 1.0]); }
+        function(event) { 
+            let val = event.srcElement.value;
+            gl.uniform4fv(gl.getUniformLocation(program, "ambient"), [val, val, val, 1.0]); }
     
     
 
@@ -156,7 +158,9 @@ function render(gl) {
     // View
     theta += speed;
     let r = 3.5;
-    let V = lookAt(vec3(r*Math.sin(theta), 0.0, r*Math.cos(theta)), vec3(0, 0, 0.0), vec3(0.0, 1.0, 0.0));  // eye, at, look_up
+    let eye = vec3(r * Math.sin(theta), 0.0, r * Math.cos(theta));
+    let V = lookAt(eye, vec3(0, 0, 0.0), vec3(0.0, 1.0, 0.0));  // eye, at, look_up
+    gl.uniform3fv(gl.getUniformLocation(gl.program, "observer"), normalize(eye));
 
     // Perspective projection
     let P = perspective(45.0, 1.0, 0.1, 10.0);  // fovy, aspect (w/h), near, far  (near far are clipping)

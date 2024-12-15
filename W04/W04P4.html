@@ -4,7 +4,7 @@
     // attribute vec4 aColor;  // Receive color from js
     uniform mat4 MVP;
     uniform mat4 V;
-    vec3 observer = vec3(0.0,0.0,1.0);
+    uniform vec3 observer;
     const float visibility = 1.0;
 
     varying vec4 v_color;  // Send color to fragment shader
@@ -15,8 +15,10 @@
     uniform vec4 emission; // Le
 
     //Phong parameters
-    uniform float specular; // ks
+    uniform float spec; // ks
     uniform float shininess; // s
+
+    vec4 material = vec4(0.6, 0.0, 0.0, 1.0);
     
     void main() {
         gl_Position = MVP * vPosition;
@@ -25,18 +27,20 @@
         vec4 n = vPosition;
         n.w = 0.0;
         vec4 light = lightPos;
-        
         vec3 to_light = light.w == 0.0 ? normalize(-light.xyz) : normalize(light.xyz - vPosition.xyz);  // w_i
-        vec4 reflected = diffuse_coef * incident_light * max(dot(n.xyz, to_light), 0.0);  // reflected Lr,d
+        
+        vec4 diffuse = diffuse_coef * incident_light * max(dot(n.xyz, to_light), 0.0);  // reflected Lr,d
+        vec4 ambience = ambient * incident_light;  // Lr,a
         
         vec3 wr = 2.0 * dot(n.xyz, to_light) * n.xyz - to_light;  // w_r
-        vec4 phong = specular * incident_light * pow(max(dot(wr, observer), 0.0), shininess);  // Lr,s (Phong)
+        vec4 specular = spec * incident_light * pow(max(dot(wr, observer), 0.0), shininess);  // Lr,s (specular)
+
+        // Perform a back-face lighting test
 
         // vec3 omega_h = normalize(to_light + observer);  // w_h
-        // vec4 blinn_phong = specular * incident_light * pow(max(dot(n.xyz, omega_h), 0.0), shininess);  // Lr,s (BP)
+        // vec4 blinn_phong = spec * incident_light * pow(max(dot(n.xyz, omega_h), 0.0), shininess);  // Lr,s (BP)
 
-        v_color = reflected + phong + diffuse_coef * ambient;  // Lr
-        
+        v_color = (diffuse + ambience) * material + specular;  // Lr
     }
 </script>
 

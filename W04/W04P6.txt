@@ -1,0 +1,37 @@
+Answer the following questions: [Angel 5.2, 6.2, 6.3, 6.5, 6.8]
+a) What is the difference between Phong shading and Phong lighting (the
+Phong reflection model)?
+- Phong lighting is a model used to color the surface of objects based on the perspective of the viwer, light sources and material properties. It is divided into three components: Ambience, diffusion and specular.
+- Phong shading is applying the lighting to each pixel. This amounts to computing the color in the fragment shader instead of the vertex shader where it is only done on a vertex basis. The fragments automatically interpolates the colors between vertices, so it is neccesary to renormalize. 
+- The difference is that the first gives the expression for the color, while the latter applies it.
+
+b) What is the difference between flat shading, Gouraud shading, and Phong
+shading? List pros and cons of each. Is Gouraud or Phong shading the
+best method for simulating highlights? Explain.
+- Going down the list the computation becomes heavier, but the results appear more realistic.
+- Flat shading: Entire shape is colored the same color, making it appear flat.
+    Pros: No computation required
+    Cons: ...Flat
+- Gouraud shading: Lighting is computed for each vertex
+    Pros: Smoother shading
+    Cons: Details may be missed for simpler polygons and the specular highlight
+- Phong shading: Lighting is computed for each pixel
+    Pros: Perfectly smooth
+    Cons: Computationally expensive
+- For highlighting Phong shading is evidently best. This is due to highligting occuring between vertices and the distribution being non-linear.
+
+c) What is the difference between a directional light and a point light?
+- Directional light assumes the source is at an infinite distance that produces parallel rays.
+- Point light emits from a point in space and the intensity decreases over distance
+
+d) Does the eye position influence the shading of an object in any way?
+- Yes. When computing the specular component we need the direction to the observer. Thank you for asking! I forgot to set the observer position to the eye before this.
+
+e) What is the effect of setting the specular term to (0, 0, 0)?
+- Just removes the specular highlighting. Or specifically, the white diffuse circle.
+
+f) What is the effect of increasing the shininess exponent (𝛼)?
+- It makes the white circle smaller and more focused
+
+g) In what coordinate space did you compute the lighting?
+- World space. 
