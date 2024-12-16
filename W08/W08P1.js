@@ -17,7 +17,6 @@ window.onload = function init(){
 
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.enable(gl.DEPTH_TEST);
-    gl.enable(gl.CULL_FACE);
   
     program = initShaders(gl, "vertex-shader", "fragment-shader");
     gl.useProgram(program);

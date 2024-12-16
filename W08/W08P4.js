@@ -25,7 +25,6 @@ window.onload = function init(){
 
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.enable(gl.DEPTH_TEST);
-    gl.enable(gl.CULL_FACE);
     gl.cullFace(gl.BACK);
     gl.frontFace(gl.CCW);
 
@@ -123,6 +122,10 @@ window.onload = function init(){
     
     gl.uniform1f(gl.getUniformLocation(gl.program, "visibility"), 1.0)
 
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+
     render(gl);
 }
 
@@ -136,7 +139,7 @@ function render(gl){
     gl.drawElements( gl.TRIANGLES, 6, gl.UNSIGNED_BYTE, 0);
     
     // Moving shadows
-    gl.uniform1f(gl.getUniformLocation(gl.program, "visibility"), 0.0);
+    gl.uniform4f(gl.getUniformLocation(gl.program, "visibility"), 0.0,0.0,0.0,0.8);
     gl.uniform1i(gl.getUniformLocation(gl.program, "texMap"), 1);
     gl.bindTexture(gl.TEXTURE_2D, red_texture);
     
@@ -152,7 +155,7 @@ function render(gl){
     gl.depthFunc(gl.LESS);
     
     // Red quads
-    gl.uniform1f(gl.getUniformLocation(gl.program, "visibility"), 1.0);
+    gl.uniform4f(gl.getUniformLocation(gl.program, "visibility"), 1.0,1.0,1.0,1.0);
     gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, "M_s"), false, flatten(mat4()));
     gl.drawElements( gl.TRIANGLES, 12, gl.UNSIGNED_BYTE, 6);
 
