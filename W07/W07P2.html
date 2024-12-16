@@ -38,6 +38,15 @@
 -- support HTML5 -->
 Sorry; your web browser does not support HTML5's canvas element.
 </canvas>
+<div>
+    The transformation from clip space to world space by taking the inverse of the projection matrix P - 
+    a simple inverse(P) call. 
+<div>
+    The rotational part of the view matrix is constructed by forcing no translation. 
+</div>
+    This is done by creating an empty 4x4 matrix and fitting the inverse of the view matrix in the upper 3x3 part of 
+    the matrix. 
+</div>
 </body>
 </html>
 
