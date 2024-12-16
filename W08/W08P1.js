@@ -57,20 +57,20 @@ window.onload = function init(){
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint8Array(indices), gl.STATIC_DRAW);
 
     var texCoordsArray = [
-        vec2(-1., 0.0),
-        vec2(1., 0.0),
-        vec2(1, 1.0),
-        vec2(-1., 1.0),
+        vec2(-1.0, 0.0),
+        vec2(1.0, 0.0),
+        vec2(1.0, 1.0),
+        vec2(-1.0, 1.0),
 
-        vec2(-1., 0.0),
-        vec2(1., 0.0),
-        vec2(1, 1.0),
-        vec2(-1., 1.0),
+        vec2(-1.0, 0.0),
+        vec2(1.0, 0.0),
+        vec2(1.0, 1.0),
+        vec2(-1.0, 1.0),
         
-        vec2(-1., 0.0),
-        vec2(1., 0.0),
-        vec2(1, 1.0),
-        vec2(-1., 1.0),
+        vec2(-1.0, 0.0),
+        vec2(1.0, 0.0),
+        vec2(1.0, 1.0),
+        vec2(-1.0, 1.0),
     ];
 
     var tBuffer = gl.createBuffer();

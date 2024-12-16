@@ -6,7 +6,7 @@ var red_texture;
 
 var M_p = mat4();
 M_p[3][3] = 0;
-M_p[3][1] = 1 / -(2 - (-1));
+M_p[3][1] = 1 / -(2 - (-1 - 0.01));
 var theta = 0;
 
 window.onload = function init(){
@@ -121,6 +121,8 @@ window.onload = function init(){
     let P = perspective(90.0, 1.0, 0.1, 30.0);  // fovy, aspect (w/h), near, far  (near far are clipping)
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "P"), false, flatten(P));
     
+    gl.uniform1f(gl.getUniformLocation(gl.program, "visibility"), 1.0)
+
     render(gl);
 }
 
@@ -134,6 +136,7 @@ function render(gl){
     gl.drawElements( gl.TRIANGLES, 6, gl.UNSIGNED_BYTE, 0);
     
     // Moving shadows
+    gl.uniform1f(gl.getUniformLocation(gl.program, "visibility"), 0.0);
     gl.uniform1i(gl.getUniformLocation(gl.program, "texMap"), 1);
     gl.bindTexture(gl.TEXTURE_2D, red_texture);
     
@@ -143,10 +146,13 @@ function render(gl){
     let T_n = translate(negate(light)); // Negate the vec3 for the reverse translation
     M_s = mult(mult(T_p, M_p), T_n);
     
+    gl.depthFunc(gl.GREATER);
     gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, "M_s"), false, flatten(M_s));
     gl.drawElements( gl.TRIANGLES, 12, gl.UNSIGNED_BYTE, 6);
+    gl.depthFunc(gl.LESS);
     
     // Red quads
+    gl.uniform1f(gl.getUniformLocation(gl.program, "visibility"), 1.0);
     gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, "M_s"), false, flatten(mat4()));
     gl.drawElements( gl.TRIANGLES, 12, gl.UNSIGNED_BYTE, 6);
 

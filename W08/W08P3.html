@@ -1,5 +1,5 @@
 <html>
-    <h1>W08P2</h1>
+    <h1>W08P3</h1>
 <script id="vertex-shader" type="x-shader/x-vertex">
     attribute vec4 vPosition;
     uniform mat4 P;
@@ -10,7 +10,7 @@
     uniform mat4 M_s;
     void main() {
         gl_Position = P * M_s * vPosition;
-        gl_Position.y += 0.001;  // Avoid clipping
+        // gl_Position.y += 0.001;  // Avoid clipping
         fTexCoord = vTexCoord;
     }
 </script>
@@ -19,15 +19,18 @@
     precision mediump float;
     uniform sampler2D texMap;
     varying vec2 fTexCoord;
+
+    uniform float visibility;
     void main() {
-        gl_FragColor = texture2D(texMap, fTexCoord);
+        vec4 color = vec4(visibility, visibility, visibility, 1.0);
+        gl_FragColor = color * texture2D(texMap, fTexCoord);
     }
 </script>
 
 <script type="text/javascript" src="../angelCommon/webgl-utils.js"></script>
 <script type="text/javascript" src="../angelCommon/initShaders.js"></script>
 <script type="text/javascript" src="../angelCommon/MV.js"></script>
-<script type="text/javascript" src="W08P2.js"></script>
+<script type="text/javascript" src="W08P3.js"></script>
 <body>
 <canvas id="gl-canvas" width="512" height="512">
 <!-- The following message is displayed if the browser doesn’t
