@@ -1,29 +1,17 @@
 <html>
-    <h1>W07P1</h1>
+    <h1>W07P2</h1>
 
 <script id="vertex-shader" type="x-shader/x-vertex">
     attribute vec4 vPosition;
-    uniform mat4 MVP;
 
-    varying vec4 v_color;  // Send color to fragment shader
+    uniform mat4 M;
+    uniform mat4 V;
+    uniform mat4 P;
 
-    const vec4 lightPos = vec4(0.0, -1.0, -1.0, 0.0);  // le
-    uniform float kd;  // kd
-    uniform vec4 La; 
-    uniform vec4 Le;
-
-    varying vec4 n;
+    varying vec4 M_T;
     void main() {
-        gl_Position = MVP * vPosition;
-
-        n = vPosition;
-        n.w = 0.0;
-        
-        vec3 w_i = lightPos.w == 0.0 ? normalize(-lightPos.xyz) : normalize(lightPos.xyz - vPosition.xyz);
-        vec4 Lo = kd * Le * max(dot(n.xyz, w_i), 0.0) + kd * La;
-        Lo.a = 1.0;
-        
-        v_color = Lo;
+        gl_Position = P * V * vPosition;
+        M_T = M * vPosition;
     }
 </script>
 <script id="fragment-shader" type="x-shader/x-fragment">
@@ -32,15 +20,18 @@
 
     uniform samplerCube texMap;
     varying vec4 n;
+
+    varying vec4 M_T;
     void main() {
-        gl_FragColor = v_color * textureCube(texMap, normalize(n.xyz));
+        // gl_FragColor = v_color * textureCube(texMap, normalize(n.xyz));
+        gl_FragColor = textureCube(texMap, M_T.xyz);
     }
 </script>
 
 <script type="text/javascript" src="../angelCommon/webgl-utils.js"></script>
 <script type="text/javascript" src="../angelCommon/initShaders.js"></script>
 <script type="text/javascript" src="../angelCommon/MV.js"></script>
-<script type="text/javascript" src="W07P1.js"></script>
+<script type="text/javascript" src="W07P2.js"></script>
 <body>
 <canvas id="gl-canvas" width="512" height="512">
 <!-- The following message is displayed if the browser doesn’t

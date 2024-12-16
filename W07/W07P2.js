@@ -14,6 +14,17 @@ var pointsArray = [];
 var numTimesToSubdivide = 5;
 var theta = 0.0; // Camera rotation angle
 
+var quad = [
+    vec4(-1.0, -1.0, 0.999, 1.0), // Bottom-left
+    vec4( 1.0, -1.0, 0.999, 1.0), // Bottom-right
+    vec4(-1.0,  1.0, 0.999, 1.0),  // Top-right
+
+
+    vec4(-1.0, 1.0, 0.999, 1.0), // Top-left
+    vec4(1.0, -1.0, 0.999, 1.0), // Top-left
+    vec4(1.0, 1.0, 0.999, 1.0)   // Top-left
+ ];
+
 
 window.onload = function init() {
     let canvas = document.getElementById( "gl-canvas" );
@@ -29,9 +40,10 @@ window.onload = function init() {
     gl.enable( gl.CULL_FACE );  // Add culling for closed 3D objects, that only draws when facing the camera using positive dot product
     gl.enable( gl.DEPTH_TEST );  // Add depth test
 
-    
     var ext = gl.getExtension('OES_element_index_uint');
     if (!ext) { console.log('Warning: Unable to use an extension'); }
+
+
 
     // Buffers
     var vBuffer = gl.createBuffer();
@@ -40,17 +52,21 @@ window.onload = function init() {
     gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vPosition);
 
-    // Lighting
-    gl.uniform4fv(gl.getUniformLocation(program, "La"), vec4(0.6, 0.6, 0.6, 1.0));
-    gl.uniform4fv(gl.getUniformLocation(program, "Le"), vec4(1.0, 1.0, 1.0, 1.0));
-    gl.uniform1f(gl.getUniformLocation(program, "kd"), 1.0);
-
-    // Sphere
+    // Sphere and quad
     tetrahedron(va, vb, vc, vd, numTimesToSubdivide);
+    pointsArray.push(  
+        vec4(-1.0, -1.0, 0.999, 1.0), // Bottom-left
+        vec4( 1.0, -1.0, 0.999, 1.0), // Bottom-right
+        vec4(-1.0,  1.0, 0.999, 1.0),  // Top-right
+    
+        vec4(-1.0, 1.0, 0.999, 1.0), // Top-left
+        vec4(1.0, -1.0, 0.999, 1.0), // Top-left
+        vec4(1.0, 1.0, 0.999, 1.0)) ;// Top-left)
     gl.bufferData(gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW);
     
     // Texture
-    initTexture(gl);
+    initTexture(gl);    
+        
     render(gl);
 }   
 
@@ -90,8 +106,6 @@ function initTexture(gl)
 
 }
 
-
-
 function tetrahedron(a, b, c, d, n) {
     divideTriangle(a, b, c, n);
     divideTriangle(d, c, b, n);
@@ -121,7 +135,6 @@ function triangle(a, b, c) {
 
 function render(gl) {
 
-    gl.clearColor(0.3921, 0.5843, 0.9294, 1.0)
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);  // Add depth buffer bit
 
     // View
@@ -129,14 +142,32 @@ function render(gl) {
     let V = lookAt(vec3(3.5*Math.sin(theta), 0.0, 3.5*Math.cos(theta)), vec3(0, 0, 0.0), vec3(0.0, 1.0, 0.0));  // eye, at, look_up
 
     // Perspective projection
-    let P = perspective(45.0, 1.0, 0.1, 10.0);  // fovy, aspect (w/h), near, far  (near far are clipping)
+    let P = perspective(90.0, 1.0, 0.1, 100.0);  // fovy, aspect (w/h), near, far  (near far are clipping)
+
+    sendMVP(gl, mat4(), V, P);
+    gl.drawArrays(gl.TRIANGLES, 0, pointsArray.length);  // Draw sphere
+
+    // Background quad
+    let i_w = inverse(V);
+    i_w[0][3] = 0.0;
+    i_w[1][3] = 0.0;
+    i_w[2][3] = 0.0;
+    i_w[3][3] = 0.0;
     
-    let mvp = gl.getUniformLocation(gl.program, "MVP");
-    gl.uniformMatrix4fv(mvp, false, flatten(mult(P, V)));
+    i_w[3][0] = 0.0;
+    i_w[3][1] = 0.0;
+    i_w[3][2] = 0.0;
 
-    gl.drawArrays(gl.TRIANGLES, 0, pointsArray.length);
+    let M = mult(i_w, inverse(P));
 
-    requestAnimationFrame(() => {render(gl)})
-
+    sendMVP(gl, M, mat4(), mat4());
+    gl.drawArrays(gl.TRIANGLES, pointsArray.length - 6, 6);  // Draw quad
     
+    requestAnimationFrame(() => {render(gl)})    
+}
+
+function sendMVP(gl, M, V, P) {
+    gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, "M"), false, flatten(M)); 
+    gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, "V"), false, flatten(V));
+    gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, "P"), false, flatten(P));
 }
