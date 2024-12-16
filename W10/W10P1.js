@@ -1,6 +1,8 @@
-
 var g_objDoc = null; // The information of OBJ file
 var g_drawingInfo = null; // The information for drawing 3D model
+
+var currentAngle = [0.0, 0.0]; // [x-axis, y-axis] degrees
+
 window.onload = function init()
 {   
 
@@ -21,11 +23,6 @@ window.onload = function init()
       console.log('Warning: Unable to use extension')
     }
     
-  let V = lookAt(vec3(10, 60, 40.0), vec3(0.0,0.0,0.0), vec3(0.0, 1.0, 0.0));
-  let P = perspective(70, 1, 0.1, 100);
-  let mvp = gl.getUniformLocation(program, "MVP");
-  gl.uniformMatrix4fv(mvp, false, flatten(mult(P, V)));
-  
   
   // Get the storage locations of attribute and uniform variables
   program.a_Position = gl.getAttribLocation(program, 'vPosition');
@@ -37,19 +34,97 @@ window.onload = function init()
   
   // Start reading the OBJ file
   readOBJFile('data/FarmDog.OBJ', gl, model, 40, true);
+
+
+  // Diffuse reflection coefficient (Kd)
+  gl.uniform1f(gl.getUniformLocation(program, "diffuse_coef"), 0.9);
+  document.getElementById("Kd").oninput = 
+      function(event) { gl.uniform1f(gl.getUniformLocation(program, "diffuse_coef"), event.srcElement.value); }
   
+  // Specular coefficient (Ks)
+  gl.uniform1f(gl.getUniformLocation(program, "spec"), 1.0);
+  document.getElementById("Ks").oninput = 
+      function(event) { gl.uniform1f(gl.getUniformLocation(program, "spec"), event.srcElement.value); }
+  
+  // Shininess coefficient (s)
+  gl.uniform1f(gl.getUniformLocation(program, "shininess"), 100);
+  document.getElementById("s").oninput = 
+      function(event) { gl.uniform1f(gl.getUniformLocation(program, "shininess"), event.srcElement.value); }
+  
+  // Light emission (Le)
+  gl.uniform4fv(gl.getUniformLocation(program, "emission"), [0.3, 0.3, 0.3, 1.0]);
+  document.getElementById("Le").oninput = 
+      function(event) { 
+          let val = event.srcElement.value;
+          gl.uniform4fv(gl.getUniformLocation(program, "emission"), [val, val, val, 1.0]); }
+  
+  // Ambient light intensity (La)
+  gl.uniform4fv(gl.getUniformLocation(program, "ambient"), [0.7, 0.7, 0.7, 1.0]);
+  document.getElementById("La").oninput = 
+      function(event) { 
+          let val = event.srcElement.value;
+          gl.uniform4fv(gl.getUniformLocation(program, "ambient"), [val, val, val, 1.0]); }
+  
+  ///////////////
+  // W10!
+  ///////////////
+
+  // Register the event handler
+  
+  initEventHandlers(canvas, currentAngle);
   render(gl, model);
   
   
 }
 
+function initEventHandlers(canvas, currentAngle) {
+  var dragging = false;         // Dragging or not
+  var lastX = -1, lastY = -1;   // Last position of the mouse
+
+  canvas.onmousedown = function(ev) {   // Mouse is pressed
+    var x = ev.clientX, y = ev.clientY;
+    // Start dragging if a mouse is in <canvas>
+    var rect = ev.target.getBoundingClientRect();
+    if (rect.left <= x && x < rect.right && rect.top <= y && y < rect.bottom) {
+      lastX = x; lastY = y;
+      dragging = true;
+    }
+  };
+  // Mouse is released
+  canvas.onmouseup = function() { dragging = false; }; 
+
+  // Mouse is moved
+  canvas.onmousemove = function(ev) {
+    var x = ev.clientX, y = ev.clientY;
+    if (dragging) {
+      var factor = 100/canvas.height; // The rotation ratio
+      var dx = factor * (x - lastX);
+      var dy = factor * (y - lastY);
+      // Limit x-axis rotation angle to -90 to 90 degrees
+      currentAngle[0] = Math.max(Math.min(currentAngle[0] + dy, 90.0), -90.0);
+      currentAngle[1] = currentAngle[1] + dx;
+    }
+    lastX = x, lastY = y;
+  };
+}
+
+
 function render(gl, model){
+  let V = lookAt(vec3(40, 50, 50), vec3(0.0,0.0,0.0), vec3(0.0, 1.0, 0.0));
+  let P = perspective(80, 1, 0.1, 100);
+  let R1 = rotate(currentAngle[0], 1, 0, 0);
+  let R2 = rotate(currentAngle[1], 0, 1, 0);
+  let MVP = mult(P, mult(V, mult(R1, R2)));
+  // gl.uniformMatrix4fv(mvp, false, flatten(mult(P, V)));
+  gl.uniformMatrix4fv(gl.getUniformLocation(program, "MVP"), false, flatten(MVP));
+
   gl.clearColor(0.3921,0.5843,0.9224,1.0);
   if (!g_objDoc) return;
   g_drawingInfo = onReadComplete(gl,model,g_objDoc);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.drawElements(gl.TRIANGLES, g_drawingInfo.indices.length,gl.UNSIGNED_INT, 0);
-
+  
+  requestAnimationFrame(() => {render(gl, model)})
 }
 
 // Create a buffer object and perform the initial configuration

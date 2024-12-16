@@ -31,7 +31,7 @@ window.onload = function init()
   let model = initVertexBuffers(gl, program);
   
   // Start reading the OBJ file
-  readOBJFile('data/FarmDog2.OBJ', gl, model, 40, true);
+  readOBJFile('data/FarmDog.OBJ', gl, model, 40, true);
 
 
   // Diffuse reflection coefficient (Kd)
