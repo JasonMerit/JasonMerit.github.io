@@ -1,5 +1,5 @@
 <html>
-    <h1>W07P2</h1>
+    <h1>W07P3</h1>
 
 <script id="vertex-shader" type="x-shader/x-vertex">
     attribute vec4 vPosition;
@@ -9,9 +9,12 @@
     uniform mat4 P;
 
     varying vec4 M_T;
+    
+    varying vec3 n;
     void main() {
         gl_Position = P * V * vPosition;
         M_T = M * vPosition;
+        n = vPosition.xyz;
     }
 </script>
 <script id="fragment-shader" type="x-shader/x-fragment">
@@ -19,19 +22,24 @@
     varying vec4 v_color;
 
     uniform samplerCube texMap;
-    varying vec4 n;
-
+    
     varying vec4 M_T;
+    
+    uniform float reflective;
+    varying vec3 n;
+    uniform vec3 eye;
+    
     void main() {
-        // gl_FragColor = v_color * textureCube(texMap, normalize(n.xyz));
-        gl_FragColor = textureCube(texMap, M_T.xyz);
+        vec3 normal = normalize(n);
+        vec3 reflection = mix(M_T.xyz, reflect(normal - eye, normal), reflective);
+        gl_FragColor = textureCube(texMap, reflection);
     }
 </script>
 
 <script type="text/javascript" src="../angelCommon/webgl-utils.js"></script>
 <script type="text/javascript" src="../angelCommon/initShaders.js"></script>
 <script type="text/javascript" src="../angelCommon/MV.js"></script>
-<script type="text/javascript" src="W07P2.js"></script>
+<script type="text/javascript" src="W07P3.js"></script>
 <body>
 <canvas id="gl-canvas" width="512" height="512">
 <!-- The following message is displayed if the browser doesn’t

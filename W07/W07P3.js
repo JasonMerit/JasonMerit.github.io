@@ -130,12 +130,14 @@ function render(gl)
 
     // View
     theta += 0.01;
-    let V = lookAt(vec3(3.5*Math.sin(theta), 0.0, 3.5*Math.cos(theta)), vec3(0, 0, 0.0), vec3(0.0, 1.0, 0.0));  // eye, at, look_up
+    let eye = vec3(3.5*Math.sin(theta), 0.0, 3.5*Math.cos(theta))
+    gl.uniform3fv(gl.getUniformLocation(gl.program, "eye"), flatten(eye));
+    let V = lookAt(eye, vec3(0, 0, 0.0), vec3(0.0, 1.0, 0.0));  // eye, at, look_up
 
     // Perspective projection
     let P = perspective(90.0, 1.0, 0.1, 10.0);  // fovy, aspect (w/h), near, far  (near far are clipping)
 
-    sendMVP(gl, mat4(), V, P);
+    send(gl, mat4(), V, P, 1.0);
     gl.drawArrays(gl.TRIANGLES, 0, pointsArray.length - 6);
 
     // Background quad
@@ -143,13 +145,14 @@ function render(gl)
     i_w[0][3] = i_w[1][3] = i_w[2][3] = 0.0;
     i_w = mult(i_w, inverse(P));
 
-    sendMVP(gl, i_w, mat4(), mat4());
+    send(gl, i_w, mat4(), mat4(), 0.0);
     gl.drawArrays(gl.TRIANGLES, pointsArray.length -6, 6);
 
 }
 
-function sendMVP(gl, M, V, P) {
+function send(gl, M, V, P, reflect) {
     gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, "M"), false, flatten(M)); 
     gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, "V"), false, flatten(V));
     gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, "P"), false, flatten(P));
+    gl.uniform1f(gl.getUniformLocation(gl.program, "reflective"), reflect);
 }
