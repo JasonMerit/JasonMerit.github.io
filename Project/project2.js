@@ -8,18 +8,33 @@ window.onload = function init() {
     
     let program = initShaders(gl, "vertex-shader", "fragment-shader");
     gl.useProgram(program); gl.program = program;
-    gl.enable(gl.CULL_FACE); gl.enable(gl.DEPTH_TEST);
-    // gl.clearColor(0.3921, 0.5843, 0.9294, 1.0)
+    gl.enable(gl.CULL_FACE); 
+    gl.enable(gl.DEPTH_TEST);
     gl.clearColor(0.1, 0.1, 0.1, 1.0)
 
     gl.n = initVertexBuffers(gl); // Write vertices to vertex shader
     gl.mvpLoc = gl.getUniformLocation(program, 'MVP');
-    var theta = 0.0; // The rotation angle
+    var theta = 50.0; // The rotation angle
+    var speed = 0.0; // The rotation speed
+    
+    document.getElementById("Theta").oninput = function(event) { 
+      theta = event.srcElement.value;
+      speed = 0;
+    }
 
+    window.addEventListener("keydown", function(event) {
+      if (event.code === "Space") {
+        speed = speed == 0.0 ? 1.0 : 0.0;
+        event.preventDefault(); // Prevent default scrolling behavior
+      }
+    });
+  
+    
     /////////////////
     // Project code
     ////////////////
-    gl.u_Clicked = gl.getUniformLocation(program, 'u_Clicked');
+    gl.u_PickedFace = gl.getUniformLocation(program, 'u_PickedFace');
+    gl.uniform1i(gl.u_PickedFace, -1);
 
 
     // Register the event handler
@@ -30,23 +45,30 @@ window.onload = function init() {
       if (rect.left <= x && x < rect.right && rect.top <= y && y < rect.bottom) {
         // Check if it is on object
         var x_in_canvas = x - rect.left, y_in_canvas = rect.bottom - y;
-        var picked = check(gl, x_in_canvas, y_in_canvas, theta);
-        if (picked) { 
-          // alert('The cube was selected! '); 
-          console.log("SUCCESS");
-        }
+        var face = checkFace(gl, x_in_canvas, y_in_canvas, theta);
+        gl.uniform1i(gl.u_PickedFace, face);
+        draw(gl, theta);
       }
     }
     
   
   // Start drawing
   var tick = function () {
-    theta += 1.0;
+    theta += speed;
     draw(gl, theta);
     requestAnimationFrame(tick);
   };
   tick();    
 }   
+
+function checkFace(gl, x, y, theta) {
+  var pixels = new Uint8Array(4);  // Array for storing the pixel value
+  gl.uniform1i(gl.u_PickedFace, 0); // Write surface number into alpha
+  draw(gl, theta);
+  // Read the pixels at (x, y). pixels[3] is the surface number
+  gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+  return pixels[3];
+}
 
 function check(gl, x, y, theta) {
     // 1) Draw the cube with red
@@ -108,6 +130,15 @@ function initVertexBuffers(gl) {
       -1.0, -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, -1.0, -1.0, 1.0,    // v7-v4-v3-v2 down
        1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0     // v4-v7-v6-v5 back
     ]);
+
+    var faces = new Uint8Array([   // Surface number
+      1, 1, 1, 1, 1, 1,  // v0-v1-v2-v3 front
+      2, 2, 2, 2, 2, 2,  // v0-v3-v4-v5 right
+      3, 3, 3, 3, 3, 3,  // v0-v5-v6-v1 up
+      4, 4, 4, 4, 4, 4,  // v1-v6-v7-v2 left
+      5, 5, 5, 5, 5, 5,  // v7-v4-v3-v2 down
+      6, 6, 6, 6, 6, 6   // v4-v7-v6-v5 back
+    ]);
   
     var colors = new Float32Array([     // Colors
       0.5, 0.5, 0.0, 0.5, 0.5, 0.0, 0.5, 0.5, 0.0, 0.5, 0.5, 0.0,  // v0-v1-v2-v3 front
@@ -132,8 +163,11 @@ function initVertexBuffers(gl) {
     if (!indexBuffer)
       return -1;
   
-    // Write the vertex coordinates and color to the buffer object
+    // Write the vertex coordinates, faces and color to the buffer object
     if (!initArrayBuffer(gl, vertices, 3, gl.FLOAT, 'a_Position'))
+      return -1;
+
+    if (!initArrayBuffer(gl, faces, 1, gl.UNSIGNED_BYTE, 'a_Face'))
       return -1;
   
     if (!initArrayBuffer(gl, colors, 3, gl.FLOAT, 'a_Color'))
