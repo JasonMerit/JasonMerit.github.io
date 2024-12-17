@@ -42,7 +42,7 @@ function render(gl, theta) {
     
     // Perspective projection
     let P = perspective(45.0, 1.0, 0.1, 10.0);  // fovy, aspect (w/h), near, far  (near far are clipping)
-    
+     
     let MVP = mult(mult(P, V), M);
     gl.uniformMatrix4fv(gl.mvpLoc, false, flatten(MVP));
     

@@ -1,0 +1,36 @@
+<html>
+    <h1>Cube</h1>
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        attribute vec4 a_Position;
+        attribute vec4 a_Color;
+        uniform mat4 MVP;
+        varying vec4 v_Color;
+        void main() {
+            gl_Position = MVP * a_Position;
+            v_Color = a_Color;
+        }
+    </script>
+    
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        varying vec4 v_Color;
+        void main() {
+            // gl_FragColor = 0.5*v_Color + 0.5;
+            gl_FragColor = v_Color;
+        }
+    </script>
+
+<script type="text/javascript" src="../angelCommon/webgl-utils.js"></script>
+<script type="text/javascript" src="../angelCommon/initShaders.js"></script>
+<script type="text/javascript" src="../angelCommon/MV.js"></script>
+<script type="text/javascript" src="project0.js"></script>
+<body>
+<canvas id="gl-canvas" width="512" height="512">
+<!-- The following message is displayed if the browser doesn’t
+-- support HTML5 -->
+Sorry; your web browser does not support HTML5's canvas element.
+</canvas>
+</body>
+</html>
+
+
