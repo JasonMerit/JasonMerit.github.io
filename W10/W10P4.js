@@ -64,10 +64,8 @@ function initEventHandlers(canvas) {
 
   canvas.onmouseup = function (ev) {
     var x = ev.clientX, y = ev.clientY;
-    console.log(lastX, x);
     if (x === lastX && y === lastY) {
       q_inc.setIdentity();
-      console.log("Reset rotation");
     }
     dragging = false;
     current_action = 0;
