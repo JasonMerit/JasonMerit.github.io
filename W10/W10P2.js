@@ -3,6 +3,14 @@ var g_drawingInfo = null; // The information for drawing 3D model
 
 var currentAngle = [0.0, 0.0]; // [x-axis, y-axis] degrees
 
+var MVP = mat4(); // Model view projection matrix
+var q_rot = new Quaternion();  // Cumulative rotation quaternion
+var q_inc = new Quaternion();  // Incremental rotation quaternion
+
+var LOL = 0;
+var KEK = 1;
+var DOG = 10;
+
 window.onload = function init()
 {   
 
@@ -17,6 +25,7 @@ window.onload = function init()
   
   program = initShaders(gl, "vertex-shader", "fragment-shader");
   gl.useProgram(program);
+  gl.program = program;
   
   var ext = gl.getExtension("OES_element_index_uint");
   if (!ext){
@@ -65,56 +74,23 @@ window.onload = function init()
           let val = event.srcElement.value;
           gl.uniform4fv(gl.getUniformLocation(program, "ambient"), [val, val, val, 1.0]); }
   
-  ///////////////
-  // W10!
-  ///////////////
+  document.getElementById("LOL").oninput = function(event) { LOL = event.srcElement.value; }
+  document.getElementById("KEK").oninput = function(event) { KEK = event.srcElement.value; }
+  document.getElementById("DOG").oninput = function(event) { DOG = event.srcElement.value; }
 
   // Register the event handler
-  
-  initEventHandlers(canvas, currentAngle);
-  render(gl, model);
-  
+  initEventHandlers(canvas);
+  render(gl, model);  
 }
 
-function initEventHandlers(canvas, currentAngle) {
-  var dragging = false;         // Dragging or not
-  var lastX = -1, lastY = -1;   // Last position of the mouse
-
-  canvas.onmousedown = function(ev) {   // Mouse is pressed
-    var x = ev.clientX, y = ev.clientY;
-    // Start dragging if a mouse is in <canvas>
-    var rect = ev.target.getBoundingClientRect();
-    if (rect.left <= x && x < rect.right && rect.top <= y && y < rect.bottom) {
-      lastX = x; lastY = y;
-      dragging = true;
-    }
-  };
-  // Mouse is released
-  canvas.onmouseup = function() { dragging = false; }; 
-
-  // Mouse is moved
-  canvas.onmousemove = function(ev) {
-    var x = ev.clientX, y = ev.clientY;
-    if (dragging) {
-      var factor = 100/canvas.height; // The rotation ratio
-      var dx = factor * (x - lastX);
-      var dy = factor * (y - lastY);
-      // Limit x-axis rotation angle to -90 to 90 degrees
-      currentAngle[0] = Math.max(Math.min(currentAngle[0] + dy, 90.0), -90.0);
-      currentAngle[1] = currentAngle[1] + dx;
-    }
-    lastX = x, lastY = y;
-  };
-}
 
 
 function render(gl, model){
-  let V = lookAt(vec3(40, 50, 50), vec3(0.0,0.0,0.0), vec3(0.0, 1.0, 0.0));
+  var up = q_rot.apply(vec3(0, 1, 50));
+  var rot_eye = q_rot.apply(vec3(0, 1.0, 2.0));
   let P = perspective(80, 1, 0.1, 100);
-  let R1 = rotate(currentAngle[0], 1, 0, 0);
-  let R2 = rotate(currentAngle[1], 0, 1, 0);
-  let MVP = mult(P, mult(V, mult(R1, R2)));
-  // gl.uniformMatrix4fv(mvp, false, flatten(mult(P, V)));
+  let V = lookAt(q_rot.apply(up), vec3(0, 0, 0), q_rot.apply(rot_eye));
+  MVP = mult(P, V);
   gl.uniformMatrix4fv(gl.getUniformLocation(program, "MVP"), false, flatten(MVP));
 
   gl.clearColor(0.3921,0.5843,0.9224,1.0);
@@ -123,7 +99,78 @@ function render(gl, model){
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.drawElements(gl.TRIANGLES, g_drawingInfo.indices.length,gl.UNSIGNED_INT, 0);
   
-  requestAnimationFrame(() => {render(gl, model)})
+  requestAnimationFrame(() => {render(gl, model)});
+}
+
+
+function initEventHandlers(canvas) {
+  var dragging = false;         // Dragging or not
+  var lastX = -1, lastY = -1;   // Last position of the mouse
+  var current_action = 0;       // Actions: 0 - none, 1 - orbit, 2 - dolly, 3 - pan
+
+  canvas.onmousedown = function (ev) {   // Mouse is pressed
+    
+    ev.preventDefault();
+    var x = ev.clientX, y = ev.clientY;
+    // Start dragging if a mouse is in <canvas>
+    var rect = ev.target.getBoundingClientRect();
+    if (rect.left <= x && x < rect.right && rect.top <= y && y < rect.bottom) {
+      lastX = x; lastY = y;
+      dragging = true;
+      current_action = ev.button + 1;
+    }
+  };
+
+  canvas.oncontextmenu = function (ev) { ev.preventDefault(); };
+
+  canvas.onmouseup = function (ev) {
+    var x = ev.clientX, y = ev.clientY;
+    if (x === lastX && y === lastY) {
+      q_inc.setIdentity();
+    }
+    dragging = false;
+    current_action = 0;
+  }; // Mouse is released
+
+  canvas.onmousemove = function (ev) { // Mouse is moved
+    var x = ev.clientX, y = ev.clientY;
+    if (dragging) {
+      var rect = ev.target.getBoundingClientRect();
+      var s_x = ((x - rect.left) / rect.width - 0.5) * 2;
+      var s_y = (0.5 - (y - rect.top) / rect.height) * 2;
+      var s_last_x = ((lastX - rect.left) / rect.width - 0.5) * 2;
+      var s_last_y = (0.5 - (lastY - rect.top) / rect.height) * 2;
+      var v1 = vec3(s_x, s_y, project_to_sphere(s_x, s_y));
+      var v2 = vec3(s_last_x, s_last_y, project_to_sphere(s_last_x, s_last_y));
+      q_inc = q_inc.make_rot_vec2vec(normalize(v1), normalize(v2));
+      q_rot = q_rot.multiply(q_inc);
+    }
+    lastX = x, lastY = y;
+  };
+}
+///////////////////////////////////////////
+// DRAW
+///////////////////////////////////////////
+
+
+
+
+
+
+// Project an x,y pair onto a sphere of radius r OR a hyperbolic sheet
+// if we are away from the center of the sphere.
+function project_to_sphere(x, y) {
+  var r = 2;
+  var d = Math.sqrt(x * x + y * y);
+  var t = r * Math.sqrt(2);
+  var z;
+  if (d < r) // Inside sphere
+    z = Math.sqrt(r * r - d * d);
+  else if (d < t)
+    z = 0;
+  else       // On hyperbola
+    z = t * t / d;
+  return z;
 }
 
 // Create a buffer object and perform the initial configuration

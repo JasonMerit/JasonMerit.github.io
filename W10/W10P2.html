@@ -1,5 +1,5 @@
 <html>
-  <h1>W10P1</h1>
+  <h1>W10P2</h1>
     <script id="vertex-shader" type="x-shader/x-vertex">
         attribute vec4 vPosition;
         attribute vec4 a_Color; 
@@ -53,7 +53,8 @@
 <script type="text/javascript" src="../angelCommon/webgl-utils.js"></script>
 <script type="text/javascript" src="../angelCommon/initShaders.js"></script>
 <script type="text/javascript" src="../angelCommon/MV.js"></script>
-<script type="text/javascript" src="W10P1.js"></script>
+<script type="text/javascript" src="quaternion.js"></script>
+<script type="text/javascript" src="W10P2.js"></script>
 <body>
 <canvas id="gl-canvas" width="512" height="512">
 <!-- The following message is displayed if the browser doesn’t
@@ -80,6 +81,18 @@ Sorry; your web browser does not support HTML5's canvas element.
 <div>
   <input type="range" id="La" name="La" min="0" max="1" value="0.1"step="0.01" />
   La (ambient)
+</div>
+<div>
+  <input type="range" id="LOL" name="LOL" min="0" max="20" value="0"step="1" />
+  LOL 
+</div>
+<div>
+  <input type="range" id="KEK" name="KEK" min="0" max="20" value="1"step="1" />
+  KEK 
+</div>
+<div>
+  <input type="range" id="DOG" name="DOG" min="0" max="20" value="10"step="1" />
+  DOG 
 </div>
 </body>
 </html>
