@@ -35,6 +35,8 @@ window.onload = function init() {
     ////////////////
     gl.u_PickedFace = gl.getUniformLocation(program, 'u_PickedFace');
     gl.uniform1i(gl.u_PickedFace, -1);
+    gl.u_IsPicking = gl.getUniformLocation(program, 'u_IsPicking');
+    gl.uniform1i(gl.u_IsPicking, 0);
 
 
     // Register the event handler
@@ -63,11 +65,15 @@ window.onload = function init() {
 
 function checkFace(gl, x, y, theta) {
   var pixels = new Uint8Array(4);  // Array for storing the pixel value
-  gl.uniform1i(gl.u_PickedFace, 0); // Write surface number into alpha
+
+  gl.uniform1i(gl.u_IsPicking, 1);  // Pass true to u_IsPicking
+  gl.uniform1i(gl.u_PickedFace, -1); // Write surface number into alpha
+
   draw(gl, theta);
   // Read the pixels at (x, y). pixels[3] is the surface number
   gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-  return pixels[3];
+  gl.uniform1i(gl.u_IsPicking, 0);  // Pass false to u_IsPicking
+  return pixels[0];
 }
 
 function check(gl, x, y, theta) {

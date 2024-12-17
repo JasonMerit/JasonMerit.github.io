@@ -1,22 +1,27 @@
 <html>
-    <h1>Face Selection</h1>
+    <h1>Face Selection (Fixed)</h1>
     <script id="vertex-shader" type="x-shader/x-vertex">
         attribute vec4 a_Position;
         attribute vec4 a_Color;
-        uniform mat4 MVP;
-        varying vec4 v_Color;
-
         attribute float a_Face;
+        
+        uniform mat4 MVP;
         uniform int u_PickedFace;
+        uniform bool u_IsPicking; // Flag: true during face picking
+
+        varying vec4 v_Color;
+        varying float v_FaceID; // Non-interpolated face ID
         void main() {
             gl_Position = MVP * a_Position;
-            // v_Color = mix(a_Color, vec4(1.0, 0.0, 0.0, 1.0), u_Clicked);
-
-            int face = int(a_Face);
-            vec3 color = (face == u_PickedFace) ? vec3(1.0) : a_Color.rgb;
-            if (u_PickedFace == 0) {
-                v_Color = vec4(color, a_Face/255.0);
+            
+            if (u_IsPicking) {
+                // Pass face ID as alpha for picking
+                v_FaceID = a_Face;
+                v_Color = vec4(0.0, 0.0, 0.0, a_Face /255.0);
             } else {
+                // Highlight selected face or use normal colors
+                int face = int(a_Face);
+                vec3 color = (face == u_PickedFace) ? vec3(1.0) : a_Color.rgb;
                 v_Color = vec4(color, a_Color.a);
             }
         }
@@ -25,15 +30,21 @@
     <script id="fragment-shader" type="x-shader/x-fragment">
         precision mediump float;
         varying vec4 v_Color;
+        varying float v_FaceID; // Non-interpolated face ID
+        uniform bool u_IsPicking; // Flag: true during face picking
         void main() {
-            gl_FragColor = v_Color;
+            if (u_IsPicking) {
+                gl_FragColor = vec4(v_FaceID / 255.0, 0.0, 0.0, 1.0);
+            } else {
+                gl_FragColor = v_Color;  // Render normal colors
+            }
         }
     </script>
 
 <script type="text/javascript" src="../angelCommon/webgl-utils.js"></script>
 <script type="text/javascript" src="../angelCommon/initShaders.js"></script>
 <script type="text/javascript" src="../angelCommon/MV.js"></script>
-<script type="text/javascript" src="project2.js"></script>
+<script type="text/javascript" src="project3.js"></script>
 <body>
 <canvas id="gl-canvas" width="512" height="512">
 <!-- The following message is displayed if the browser doesn’t
