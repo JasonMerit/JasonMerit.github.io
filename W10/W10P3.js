@@ -1,13 +1,18 @@
 var g_objDoc = null; // The information of OBJ file
 var g_drawingInfo = null; // The information for drawing 3D model
 
-var P = perspective(80, 1, 0.1, 100);
 var q_rot = new Quaternion();  // Cumulative rotation quaternion
 var q_inc = new Quaternion();  // Incremental rotation quaternion
-
+var eye_dist_pan = vec3(60.0, 10.0, 0.0); // eye distance and pan vector
+var P = perspective(80, 1, 0.1, 100);
 var LOL = 0;
 var KEK = 1;
 var DOG = 10;
+
+// Setup the view by specifying eye and lookat
+var eye = vec3(3.0, 3.0, 7.0);
+var lookat = vec3(0.0, 0.0, 0.0);
+var up = vec3(0.0, 1.0, 0.0);
 
 window.onload = function init()
 {   
@@ -31,62 +36,22 @@ window.onload = function init()
     }
     
   
-  // Get the storage locations of attribute and uniform variables
-  program.a_Position = gl.getAttribLocation(program, 'vPosition');
-  program.a_Normal = gl.getAttribLocation(program, 'a_Normal');
-  program.a_Color = gl.getAttribLocation(program, 'a_Color');
-  
-  // Prepare empty buffer objects for vertex coordinates, colors, and normals
-  let model = initVertexBuffers(gl, program);
-  
-  // Start reading the OBJ file
-  readOBJFile('data/FarmDog.OBJ', gl, model, 40, true);
-
-
-  // Diffuse reflection coefficient (Kd)
-  gl.uniform1f(gl.getUniformLocation(program, "diffuse_coef"), 0.9);
-  document.getElementById("Kd").oninput = 
-      function(event) { gl.uniform1f(gl.getUniformLocation(program, "diffuse_coef"), event.srcElement.value); }
-  
-  // Specular coefficient (Ks)
-  gl.uniform1f(gl.getUniformLocation(program, "spec"), 1.0);
-  document.getElementById("Ks").oninput = 
-      function(event) { gl.uniform1f(gl.getUniformLocation(program, "spec"), event.srcElement.value); }
-  
-  // Shininess coefficient (s)
-  gl.uniform1f(gl.getUniformLocation(program, "shininess"), 100);
-  document.getElementById("s").oninput = 
-      function(event) { gl.uniform1f(gl.getUniformLocation(program, "shininess"), event.srcElement.value); }
-  
-  // Light emission (Le)
-  gl.uniform4fv(gl.getUniformLocation(program, "emission"), [0.3, 0.3, 0.3, 1.0]);
-  document.getElementById("Le").oninput = 
-      function(event) { 
-          let val = event.srcElement.value;
-          gl.uniform4fv(gl.getUniformLocation(program, "emission"), [val, val, val, 1.0]); }
-  
-  // Ambient light intensity (La)
-  gl.uniform4fv(gl.getUniformLocation(program, "ambient"), [0.7, 0.7, 0.7, 1.0]);
-  document.getElementById("La").oninput = 
-      function(event) { 
-          let val = event.srcElement.value;
-          gl.uniform4fv(gl.getUniformLocation(program, "ambient"), [val, val, val, 1.0]); }
-  
-  document.getElementById("LOL").oninput = function(event) { LOL = event.srcElement.value; }
-  document.getElementById("KEK").oninput = function(event) { KEK = event.srcElement.value; }
-  document.getElementById("DOG").oninput = function(event) { DOG = event.srcElement.value; }
-
-  // Register the event handler
+  model = initDogAndSliders(gl);
   initEventHandlers(canvas);
   render(gl, model);  
 }
 
-
-
 function render(gl, model){
-  var up = q_rot.apply(vec3(0, 1, 50));
-  var rot_eye = q_rot.apply(vec3(0, 1.0, 2.0));
-  let V = lookAt(q_rot.apply(up), vec3(0, 0, 0), q_rot.apply(rot_eye));
+  var rot_up = q_rot.apply(up);
+  var right = q_rot.apply(vec3(1, 0, 0));
+  var centre = new vec3(
+    lookat[0] - right[0] * eye_dist_pan[1] - rot_up[0] * eye_dist_pan[2], 
+    lookat[1] - right[1] * eye_dist_pan[1] - rot_up[1] * eye_dist_pan[2], 
+    lookat[2] - right[2] * eye_dist_pan[1] - rot_up[2] * eye_dist_pan[2]
+  );
+  var rot_eye = q_rot.apply(vec3(0, 0.0, eye_dist_pan[0]));
+  
+  let V = lookAt(add(q_rot.apply(rot_eye), centre), centre, q_rot.apply(rot_up));
   let MVP = mult(P, V);
   gl.uniformMatrix4fv(gl.getUniformLocation(program, "MVP"), false, flatten(MVP));
 
@@ -137,14 +102,79 @@ function initEventHandlers(canvas) {
       var s_y = (0.5 - (y - rect.top) / rect.height) * 2;
       var s_last_x = ((lastX - rect.left) / rect.width - 0.5) * 2;
       var s_last_y = (0.5 - (lastY - rect.top) / rect.height) * 2;
-      var v1 = vec3(s_x, s_y, project_to_sphere(s_x, s_y));
-      var v2 = vec3(s_last_x, s_last_y, project_to_sphere(s_last_x, s_last_y));
-      q_inc = q_inc.make_rot_vec2vec(normalize(v1), normalize(v2));
+      switch (current_action) {
+        case 1: { // orbit
+          var v1 = vec3(s_x, s_y, project_to_sphere(s_x, s_y));
+          var v2 = vec3(s_last_x, s_last_y, project_to_sphere(s_last_x, s_last_y));
+          q_inc = q_inc.make_rot_vec2vec(normalize(v1), normalize(v2));
+          q_rot = q_rot.multiply(q_inc);
+        }
+        break;
+        case 2: { // dolly
+          eye_dist_pan[0] += (s_y - s_last_y) * eye_dist_pan[0];
+          eye_dist_pan[0] = Math.max(eye_dist_pan[0], 0.01);  // Limit minimum
+        }
+        break;
+        case 3: { // pan
+          eye_dist_pan[1] += (s_x - s_last_x) * eye_dist_pan[0] * 0.25;
+          eye_dist_pan[2] += (s_y - s_last_y) * eye_dist_pan[0] * 0.25;
+        }
+        break;
+      }      
       q_rot = q_rot.multiply(q_inc);
     }
     lastX = x, lastY = y;
   };
 }
+
+function initDogAndSliders(gl){
+  // Get the storage locations of attribute and uniform variables
+  program.a_Position = gl.getAttribLocation(program, 'vPosition');
+  program.a_Normal = gl.getAttribLocation(program, 'a_Normal');
+  program.a_Color = gl.getAttribLocation(program, 'a_Color');
+  
+  // Prepare empty buffer objects for vertex coordinates, colors, and normals
+  let model = initVertexBuffers(gl, program);
+  
+  // Start reading the OBJ file
+  readOBJFile('data/FarmDog.OBJ', gl, model, 40, true);
+
+  // Diffuse reflection coefficient (Kd)
+  gl.uniform1f(gl.getUniformLocation(program, "diffuse_coef"), 0.9);
+  document.getElementById("Kd").oninput = 
+      function(event) { gl.uniform1f(gl.getUniformLocation(program, "diffuse_coef"), event.srcElement.value); }
+  
+  // Specular coefficient (Ks)
+  gl.uniform1f(gl.getUniformLocation(program, "spec"), 1.0);
+  document.getElementById("Ks").oninput = 
+      function(event) { gl.uniform1f(gl.getUniformLocation(program, "spec"), event.srcElement.value); }
+  
+  // Shininess coefficient (s)
+  gl.uniform1f(gl.getUniformLocation(program, "shininess"), 100);
+  document.getElementById("s").oninput = 
+      function(event) { gl.uniform1f(gl.getUniformLocation(program, "shininess"), event.srcElement.value); }
+  
+  // Light emission (Le)
+  gl.uniform4fv(gl.getUniformLocation(program, "emission"), [0.3, 0.3, 0.3, 1.0]);
+  document.getElementById("Le").oninput = 
+      function(event) { 
+          let val = event.srcElement.value;
+          gl.uniform4fv(gl.getUniformLocation(program, "emission"), [val, val, val, 1.0]); }
+  
+  // Ambient light intensity (La)
+  gl.uniform4fv(gl.getUniformLocation(program, "ambient"), [0.7, 0.7, 0.7, 1.0]);
+  document.getElementById("La").oninput = 
+      function(event) { 
+          let val = event.srcElement.value;
+          gl.uniform4fv(gl.getUniformLocation(program, "ambient"), [val, val, val, 1.0]); }
+  
+  document.getElementById("LOL").oninput = function(event) { LOL = event.srcElement.value; }
+  document.getElementById("KEK").oninput = function(event) { KEK = event.srcElement.value; }
+  document.getElementById("DOG").oninput = function(event) { DOG = event.srcElement.value; }
+
+  return model;
+}
+
 
 // Project an x,y pair onto a sphere of radius r OR a hyperbolic sheet
 // if we are away from the center of the sphere.
