@@ -4,7 +4,9 @@
     attribute vec4 a_Position;
     uniform mat4 modelViewMatrix;
     void main() {
-        gl_Position = modelViewMatrix * a_Position;
+        gl_Position = a_Position;
+        // Make larger
+        gl_PointSize = 10.0;
         
     }
 </script>

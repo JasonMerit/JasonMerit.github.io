@@ -40,5 +40,5 @@ window.onload = function init()
 function render() {
     gl.clearColor(0.3921, 0.5843, 0.9294, 1.0)
     gl.clear( gl.COLOR_BUFFER_BIT );
-    gl.drawArrays( gl.HI_ALBERT, 0, points.length );
+    gl.drawArrays( gl.POINTS, 0, points.length );
 }
