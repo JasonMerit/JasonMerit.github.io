@@ -7,7 +7,7 @@ window.onload = function init()
     
     program = initShaders(gl, "vertex-shader", "fragment-shader");
     // clear color
-    gl.clearColor(0.1, 0.1, 0.1, 1.0);
+    gl.clearColor(0.05, 0.05, 0.05, 1.0);
     gl.useProgram(program);
     gl.program = program;
     gl.enable(gl.CULL_FACE);
@@ -21,7 +21,7 @@ window.onload = function init()
 
 
     gl.n = tetrahedron(gl, 5);
-    var theta = 0.0;
+    
 
     var vPosition = gl.getAttribLocation( program, "vPosition");
     gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
@@ -78,6 +78,14 @@ window.onload = function init()
     // Object selection
     ////////////////
     gl.u_Clicked = gl.getUniformLocation(program, 'u_Clicked');
+    let pixel2planet = {
+        25: 'sun', 51: 'mercury', 76: 'venus', 102: 'earth', 127: 'mars',
+        153: 'jupiter', 178: 'saturn', 204: 'uranus', 229: 'neptune'
+    }
+    let pixel2object = {
+        25: 0, 51: 1, 76: 2, 102: 3, 127: 4, 
+        153: 5, 178: 6, 204: 7, 229: 8
+    }
 
     // Register the event handler
     canvas.onmousedown = function(ev) {
@@ -86,72 +94,65 @@ window.onload = function init()
       if (rect.left <= x && x < rect.right && rect.top <= y && y < rect.bottom) {
         // Check if it is on object
         var x_in_canvas = x - rect.left, y_in_canvas = rect.bottom - y;
-        var picked = check(gl, x_in_canvas, y_in_canvas, theta);
-        if (picked) { 
-          console.log("SUCCESS");
+        var picked = check(gl, x_in_canvas, y_in_canvas, time);
+        if (picked in pixel2planet) { 
+            console.log(pixel2planet[picked]);
+            gl.selectedObject = pixel2object[picked];
         }
       }
     }
-    
+
+    var time = 0.0;
     gl.v_TexIndexLoc = gl.getUniformLocation(program, 'v_TexIndex');
-    gl.MLoc = gl.getUniformLocation(program, 'M');
-    gl.VLoc = gl.getUniformLocation(program, 'V');
-    gl.PLoc = gl.getUniformLocation(program, 'P');
     gl.MVPLoc = gl.getUniformLocation(program, 'MVP');
     gl.V = lookAt(vec3(0, 5, -4.5), vec3(0, 0, 0), vec3(0.0, 1.0, 0.0));
-    gl.V = lookAt(vec3(0, 4, -10), vec3(0, 0, 0), vec3(0.0, 1.0, 0.0));
+    // gl.V = lookAt(vec3(0, 4, -20), vec3(0, 0, 0), vec3(0.0, 1.0, 0.0));
     gl.P = perspective(90.0, 1.0, 0.1, 1000.0);
+    time = 55;
     initTexture(gl, () => {
         // Start drawing
         var tick = function () {
-            theta += 1;
-            draw(gl, theta);
+            time += 1;
+            draw(gl, time);
             requestAnimationFrame(tick);
         };
         tick();
     });
 }
 
-function draw(gl, theta)
+function draw(gl, time)
 {
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
-    // Sun
-    let M = mat4();
-    M = mult(M, rotateY(-theta));
-    gl.uniformMatrix4fv(gl.MVPLoc, false, flatten(mult(gl.P, mult(gl.V, M))));
-    gl.uniform1i(gl.v_TexIndexLoc, 0);
-    gl.drawArrays(gl.TRIANGLES, 0, gl.n);
-
-    // Planets:
-    initPlanet(gl, theta, vec3(2.0, 0.0, 0.0), vec3(0.05, 0.05, 0.05), 0.240846, 1, 1); // Mercury
-    initPlanet(gl, theta, vec3(2.5, 0.0, 0.0), vec3(0.15, 0.15, 0.15), 0.615, 6, 2); // Venus
-    initPlanet(gl, theta, vec3(3.5, 0.0, 0.0), vec3(0.16, 0.16, 0.16), 1, 12, 3); // Earth
-    initPlanet(gl, theta, vec3(4.0, 0.0, 0.0), vec3(0.08, 0.08, 0.08), 1.881, 25, 4); // Mars
-    initPlanet(gl, theta, vec3(5.2, 0.0, 0.0), vec3(0.8, 0.8, 0.8), 11.86, 10, 5); // Jupiter
-    initPlanet(gl, theta, vec3(9.0, 0.0, 0.0), vec3(1.05, 1.05, 1.05), 29.46, 11, 6); // Saturn
-    initPlanet(gl, theta, vec3(-6.7, 0.0, 0.0), vec3(0.45, 0.45, 0.45), 84.01, 17, 7); // Uranus
-    initPlanet(gl, theta, vec3(13.5, 0.0, 0.0), vec3(0.44, 0.44, 0.44), 164.8, 16, 8); // Neptune
+    body(gl, time, vec3(0.0, 0.0, 0.0), vec3(1.0, 1.0, 1.0), 1, 1, 0); // Sun
+    body(gl, time, vec3(2.0, 0.0, 0.0), vec3(0.05, 0.05, 0.05), 0.240846, 1, 1); // Mercury
+    body(gl, time, vec3(2.5, 0.0, 0.0), vec3(0.15, 0.15, 0.15), 0.615, 6, 2); // Venus
+    body(gl, time, vec3(3.5, 0.0, 0.0), vec3(0.16, 0.16, 0.16), 1, 12, 3); // Earth
+    body(gl, time, vec3(4.0, 0.0, 0.0), vec3(0.08, 0.08, 0.08), 1.881, 25, 4); // Mars
+    body(gl, time, vec3(5.2, 0.0, 0.0), vec3(0.8, 0.8, 0.8), 11.86, 10, 5); // Jupiter
+    body(gl, time, vec3(9.0, 0.0, 0.0), vec3(1.05, 1.05, 1.05), 29.46, 11, 6); // Saturn
+    body(gl, time, vec3(-6.7, 0.0, 0.0), vec3(0.45, 0.45, 0.45), 84.01, 17, 7); // Uranus
+    body(gl, time, vec3(13.5, 0.0, 0.0), vec3(0.44, 0.44, 0.44), 164.8, 16, 8); // Neptune
 }
 
 // Place the remainig planets relative to the position of the sun.
-function initPlanet(gl, theta, trans, scale, orbit, day, planet) { // Deez balls
+function body(gl, time, trans, scale, orbit, day, planet) { // Deez balls
     let M = mat4();
-    M = mult(M, rotateY(-theta / orbit));       // Rotate around the suns center
-    M = mult(M, translate(trans));             // Translate to the "orbital distance"
-    M = mult(M, rotateY(theta * day / 4));    // Rotate around itself
+    M = mult(M, rotateY(-time / orbit));       // Rotate around the suns center
+    M = mult(M, translate(trans));            // Translate to the "orbital distance"
+    M = mult(M, rotateY(time * day / 4));    // Rotate around itself
     M = mult(M, scalem(scale));
     
-
+    planet = planet == gl.selectedObject ? -1 : planet;
     gl.uniform1i(gl.v_TexIndexLoc, planet);
     gl.uniformMatrix4fv(gl.MVPLoc, false, flatten(mult(gl.P, mult(gl.V, M))));
     gl.drawArrays(gl.TRIANGLES, 0, gl.n);
 }
 
-function check(gl, x, y, theta) {
+function check(gl, x, y, time) {
     // 1) Draw the cube with red
     gl.uniform1i(gl.u_Clicked, 1);  
-    draw(gl, theta);
+    draw(gl, time);
     
     // 2) Read pixel at the clicked position
     var pixels = new Uint8Array(4);  // Array for storing the pixel value
@@ -159,10 +160,10 @@ function check(gl, x, y, theta) {
 
     // 3) Draw the cube again without color
     gl.uniform1i(gl.u_Clicked, 0);  // Draw cube back
-    draw(gl, theta);
+    draw(gl, time);
 
     // 4) Return true if pixel value is red
-    return pixels[0] == 255;
+    return pixels[0];
 }
 
 function tetrahedron(gl, n) {
