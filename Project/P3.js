@@ -79,8 +79,9 @@ window.onload = function init()
     gl.VLoc = gl.getUniformLocation(program, 'V');
     gl.PLoc = gl.getUniformLocation(program, 'P');
     gl.MVPLoc = gl.getUniformLocation(program, 'MVP');
-    gl.V = lookAt(vec3(0, 0, -4.5), vec3(0, 0, 0), vec3(0.0, 1.0, 0.0));
-    gl.P = perspective(90.0, 1.0, 0.1, 10.0);
+    gl.V = lookAt(vec3(0, 5, -4.5), vec3(0, 0, 0), vec3(0.0, 1.0, 0.0));
+    gl.P = perspective(90.0, 1.0, 0.1, 100.0);
+    gl.RLoc = gl.getUniformLocation(program, 'R');
     initTexture(gl, () => {
         // Start drawing
         var tick = function () {
@@ -96,21 +97,38 @@ window.onload = function init()
 function draw(gl, theta)
 {
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    
+    // Sun
+    let M = mat4();
+    M = mult(M, rotateY(-theta));
+    gl.uniformMatrix4fv(gl.MVPLoc, false, flatten(mult(gl.P, mult(gl.V, M))));
+    gl.uniform1i(gl.v_TexIndexLoc, 0);
+    gl.drawArrays(gl.TRIANGLES, 0, gl.n);
 
-    initPlanet(gl, vec3(0, 0, 0), vec3(1, 1, 1), theta, 0);
-    initPlanet(gl, vec3(5.0, 0.0, 5.0), vec3(0.5, 0.5, 0.5), theta, 1);
+    //Planets:
+    initPlanet(gl, vec3(2.0, 0.0, 2.0), vec3(0.5, 0.5, 0.5), theta, 1);
 }
 
 //Place the remainig planets relative to the position of the sun.
-function initPlanet(gl, translateVec, scaleVec, theta, planet) { // Deez balls
+function initPlanet(gl, trans, scale, theta, planet) { // Deez balls
     
     gl.uniform1i(gl.v_TexIndexLoc, planet);
-
+    
     let M = mat4();
-    M = mult(M, translate(translateVec));
-    M = mult(M, rotateY(-theta));
-    M = mult(M, scalem(scaleVec));
-        
+
+    M = mult(M, rotateY(-theta));       //Rotate around the suns center
+    M = mult(M, translate(trans));      //Translate to the "orbital distance"
+    M = mult(M, rotateY(-theta * 10));       //Rotate around itself
+
+    // M = mult(M, translate(vec3(1.0, 0.0, 0.0)));
+    // M = mult(M, inverse(translate(-translateVec)));
+    // M = mult(M, translate(translateVec));
+    M = mult(M, scalem(scale));
+    
+    // let R = mat4();
+    // R = rotateY(-theta);
+    // gl.uniformMatrix4fv(gl.RLoc, false, flatten(R));
+
     gl.uniformMatrix4fv(gl.MVPLoc, false, flatten(mult(gl.P, mult(gl.V, M))));
     gl.drawArrays(gl.TRIANGLES, 0, gl.n);
 }
