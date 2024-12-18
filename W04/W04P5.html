@@ -84,6 +84,58 @@ Sorry; your web browser does not support HTML5's canvas element.
     <input type="range" id="La" name="La" min="0" max="1" value="0.1"step="0.01" />
     La (ambient)
   </div>
+  <h1>W04P6</h1>
+
+    <h2>a) What is the difference between Phong shading and Phong lighting (the Phong reflection model)?</h2>
+    <p>
+        - <strong>Phong lighting</strong> is a model used to color the surface of objects based on the perspective of the viewer, light sources, and material properties. It is divided into three components: Ambient, Diffuse, and Specular.<br>
+        - <strong>Phong shading</strong> is applying the lighting to each pixel. This amounts to computing the color in the fragment shader instead of the vertex shader, where it is only done on a vertex basis. The fragments automatically interpolate the colors between vertices, so it is necessary to renormalize.<br>
+        - The difference is that the first gives the expression for the color, while the latter applies it.
+    </p>
+
+    <h2>b) What is the difference between flat shading, Gouraud shading, and Phong shading? List pros and cons of each. Is Gouraud or Phong shading the best method for simulating highlights? Explain.</h2>
+    <p>
+        - Going down the list, the computation becomes heavier, but the results appear more realistic.<br>
+        <strong>Flat shading:</strong> Entire shape is colored the same color, making it appear flat.<br>
+        &nbsp;&nbsp;Pros: No computation required.<br>
+        &nbsp;&nbsp;Cons: Flat appearance.<br><br>
+        
+        <strong>Gouraud shading:</strong> Lighting is computed for each vertex.<br>
+        &nbsp;&nbsp;Pros: Smoother shading.<br>
+        &nbsp;&nbsp;Cons: Details may be missed for simpler polygons, and the specular highlight can be inaccurate.<br><br>
+        
+        <strong>Phong shading:</strong> Lighting is computed for each pixel.<br>
+        &nbsp;&nbsp;Pros: Perfectly smooth.<br>
+        &nbsp;&nbsp;Cons: Computationally expensive.<br><br>
+        
+        For highlighting, <strong>Phong shading</strong> is evidently the best. This is due to highlighting occurring between vertices and the distribution being non-linear.
+    </p>
+
+    <h2>c) What is the difference between a directional light and a point light?</h2>
+    <p>
+        - <strong>Directional light</strong> assumes the source is at an infinite distance that produces parallel rays.<br>
+        - <strong>Point light</strong> emits from a point in space, and the intensity decreases over distance.
+    </p>
+
+    <h2>d) Does the eye position influence the shading of an object in any way?</h2>
+    <p>
+        - Yes. When computing the specular component, we need the direction to the observer. Thank you for asking! I forgot to set the observer position to the eye before this.
+    </p>
+
+    <h2>e) What is the effect of setting the specular term to (0, 0, 0)?</h2>
+    <p>
+        - It just removes the specular highlighting, or specifically, the white diffuse circle.
+    </p>
+
+    <h2>f) What is the effect of increasing the shininess exponent (𝛼)?</h2>
+    <p>
+        - It makes the white circle smaller and more focused.
+    </p>
+
+    <h2>g) In what coordinate space did you compute the lighting?</h2>
+    <p>
+        - World space.
+    </p>
 </body>
 </html>
 

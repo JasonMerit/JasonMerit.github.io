@@ -8,6 +8,9 @@ window.onload = function init()
     program = initShaders(gl, "vertex-shader", "fragment-shader");
     // clear color
     gl.clearColor(0.05, 0.05, 0.05, 1.0);
+    gl.clearColor(0.08, 0.02, 0.17, 1.0);
+    console.log(20 / 255, 5 / 255, 43 / 255);
+    // gl.clearColor(0.05, 0.05, 0.05, 1.0);
     gl.useProgram(program);
     gl.program = program;
     gl.enable(gl.CULL_FACE);
@@ -104,7 +107,12 @@ window.onload = function init()
 
     // On scroll event
     canvas.onwheel = function(ev) {
-        gl.zoom = Math.max(-14, Math.min(-2, gl.zoom - ev.deltaY / 100));
+        var x = ev.clientX, y = ev.clientY;
+        var rect = ev.target.getBoundingClientRect();
+        if (rect.left <= x && x < rect.right && rect.top <= y && y < rect.bottom) {
+            ev.preventDefault();
+            gl.zoom = Math.max(-14, Math.min(-2, gl.zoom - ev.deltaY / 100));
+        }
     }
 
     var time = 0.0;
@@ -113,7 +121,7 @@ window.onload = function init()
     gl.target = vec3(0, 0, 0);
     gl.zoom = -4;
     gl.V = lookAt(vec3(0, 5, gl.zoom), vec3(0, 0, 0), vec3(0.0, 1.0, 0.0));
-    gl.P = perspective(80.0, 1.0, 0.1, 100.0);
+    gl.P = perspective(80.0, 2.0, 0.1, 100.0);
     initTexture(gl, () => {
         // Start drawing
         var tick = function () {

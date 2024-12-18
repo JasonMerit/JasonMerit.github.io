@@ -1,0 +1,130 @@
+<html>
+    <h1>Object Selection: Final Project</h1>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+    attribute vec4 vPosition;
+
+    uniform mat4 MVP;
+
+    varying vec4 n;
+    
+    void main() {
+        gl_Position = MVP * vPosition;
+        n = vPosition;
+    }
+</script>
+<script id="fragment-shader" type="x-shader/x-fragment">
+    precision mediump float;
+    varying vec4 v_color;
+
+    uniform int v_TexIndex;
+    uniform sampler2D u_Texture0;
+    uniform sampler2D u_Texture1;
+    uniform sampler2D u_Texture2;
+    uniform sampler2D u_Texture3;
+    uniform sampler2D u_Texture4;
+    uniform sampler2D u_Texture5;
+    uniform sampler2D u_Texture6;
+    uniform sampler2D u_Texture7;
+    uniform sampler2D u_Texture8;
+
+    uniform int u_Clicked;
+    
+    varying vec4 n;
+
+    void main() {
+        vec2 uv = vec2((1.0 - atan(n.z, n.x)) / (2.0 * 3.14), acos(n.y) / 3.14);
+        if (v_TexIndex == 0) {
+            gl_FragColor = mix(texture2D(u_Texture0, uv), vec4(0.1, 0.0, 0.0, 1.0), float(u_Clicked));
+        } else if (v_TexIndex == 1) {
+            gl_FragColor = mix(texture2D(u_Texture1, uv), vec4(0.2, 0.0, 0.0, 1.0), float(u_Clicked));
+        } else if (v_TexIndex == 2) {
+            gl_FragColor = mix(texture2D(u_Texture2, uv), vec4(0.3, 0.0, 0.0, 1.0), float(u_Clicked));
+        } else if (v_TexIndex == 3) {
+            gl_FragColor = mix(texture2D(u_Texture3, uv), vec4(0.4, 0.0, 0.0, 1.0), float(u_Clicked));
+        } else if (v_TexIndex == 4) {
+            gl_FragColor = mix(texture2D(u_Texture4, uv), vec4(0.5, 0.0, 0.0, 1.0), float(u_Clicked));
+        } else if (v_TexIndex == 5) {
+            gl_FragColor = mix(texture2D(u_Texture5, uv), vec4(0.6, 0.0, 0.0, 1.0), float(u_Clicked));
+        } else if (v_TexIndex == 6) {
+            gl_FragColor = mix(texture2D(u_Texture6, uv), vec4(0.7, 0.0, 0.0, 1.0), float(u_Clicked));
+        } else if (v_TexIndex == 7) {
+            gl_FragColor = mix(texture2D(u_Texture7, uv), vec4(0.8, 0.0, 0.0, 1.0), float(u_Clicked));
+        } else if (v_TexIndex == 8) {
+            gl_FragColor = mix(texture2D(u_Texture8, uv), vec4(0.9, 0.0, 0.0, 1.0), float(u_Clicked));
+        }
+
+    }
+</script>
+
+<script type="text/javascript" src="../angelCommon/webgl-utils.js"></script>
+<script type="text/javascript" src="../angelCommon/initShaders.js"></script>
+<script type="text/javascript" src="../angelCommon/MV.js"></script>
+<script type="text/javascript" src="FinalProject.js"></script>
+<body>
+<canvas id="gl-canvas" width="1024" height="512">
+<!-- The following message is displayed if the browser doesn’t
+-- support HTML5 -->
+Sorry; your web browser does not support HTML5's canvas element.
+</canvas>
+</div>
+
+    <h2>Introduction (Jason) </h2>
+    <p>
+        For the final project, we opted to go with the project; “Object Selection,” since this offered a well-defined scope but still left room for self-exploration and interpretation of different variations of the initial project.<br>
+        Object selection is a rather interesting problem, as it doesn’t necessarily appear very intuitive to solve. Perhaps ray casting can be used, but determining the mouse position when clicked and whether an irregular shape contains the mouse position is non-trivial.<br>
+        To further develop this idea of object selection, we wanted to also incorporate some different elements from the course. This led us to decide to create a simple solar system simulator where a user clicks to select a planet.
+    </p>
+
+    <h2>Method (Amalie)</h2>
+    <p>
+        As previously stated, we included several methods introduced in the course, such as:
+    </p>
+    <ul>
+        <li>Creating spheres using recursive subdivision of triangles.</li>
+        <li>Applying 2-dimensional textures from loaded images to 3-dimensional objects.</li>
+    </ul>
+    <p>
+        We also made use of simple projection and transformations in order to both see the entirety of the solar system and properly emulate how the planets of a solar system behave. This includes how the planets rotate relative to themselves and each other, and how fast they orbit the sun depending on their orbital placement.<br>
+        At the early stages of development, much of the methods used were taken from Worksheet 6 Part 3, as it related to rendering the earth with an image texture.<br>
+        Specifically for the object selection part, we started from the methods supplied in the project description and developed them further. This included detecting when a cube is clicked by reading the pixel value as it appears on the canvas.  To detect different objects, we had to extend the method, by coloring each planet its own color during the selection check. 
+    </p>
+
+    <h2>Implementation (Jason)</h2>
+    <p>
+        To determine whether a cube is clicked, the following steps are performed:
+    </p>
+    <ol>
+        <li>Upon mouse press, the cube is colored red.</li>
+        <li>Read the pixel color at the point of the mouse.</li>
+        <li>Redraw the cube in its original color.</li>
+        <li>If the pixel color is red, the cube was selected.</li>
+    </ol>
+    <p>
+        Looking through the points, we’ve been taught all except reading the pixel value at a specific point. Since this is such a basic procedure, there should be a method for it. This is <code>gl.readPixels</code>, which returns a block of pixels on the requested area on the canvas.<br>
+        We had to break the render method into draw and tick to allow for drawing without updating the rotation. <br>
+        A few luxury features were added. Since a planet like Mercury is relatively small and has a relatively fast orbit around the sun, it is hard to select. To compensate, when drawing the spheres during the selection check, they are unscaled. Meaning, they all have the same size as the sun. Another feature is the view targeting the selected sphere planet. This is done by extracting the position of the selected sphere and passing it to the ‘lookAt’ parameter when defining the view matrix. It is also possible to zoom in and out by scrolling. 
+    </p>
+
+    <h2>Results (Amalie) </h2>
+    <p>
+        Our results turned out as expected. The solar system appears as eight spheres, each with their own size, rotation, and translation. When you click on a planet or the sun, it was implemented such that the object in question would be re-drawn in a white color.<br>
+        It worked as described in the method, showing a relatively realistic solar system with added modifications to enable user interactions, i.e., object selection.
+    </p>
+
+    <h2>Discussion (Amalie)</h2>
+    <p>
+        During the process of developing this project, certain modifications were made, due to new issues arising that we hadn’t previously thought of. An example of this, stemmed from our decision to draw a somewhat realistic solar system, meaning that the dimensions and sizes of the planets followed the actual ones to some degree. Because of this decision, we found that object selection was a particular challenge for selecting especially the small planets closer to the sun, because they were both very small and orbited the sun much faster than the remaining larger planets. 
+    </p>
+
+    <h2>Resources (Jason)</h2>
+    <ul>
+        <li>Textures: <a href="https://www.solarsystemscope.com/textures/">https://www.solarsystemscope.com/textures/</a></li>
+        <li>Relative orbital periods: <a href="https://en.wikipedia.org/wiki/Orbital_period">https://en.wikipedia.org/wiki/Orbital_period</a></li>
+        <li>One day on other planets: <a href="https://spaceplace.nasa.gov/days/en/">https://spaceplace.nasa.gov/days/en/</a></li>
+        <li>One day on sun: <a href="https://science.nasa.gov/sun/facts/">https://science.nasa.gov/sun/facts/</a></li>
+    </ul>
+</body>
+</html>
+
+
