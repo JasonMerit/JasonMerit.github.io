@@ -8,11 +8,10 @@
     uniform mat4 V;
     uniform mat4 P;
 
-    varying vec4 M_T;
     varying vec4 n;
     void main() {
-        gl_Position = P * V * vPosition;
-        M_T = M * vPosition;
+        // gl_Position = V * P * M * vPosition;
+        gl_Position = M * P * V * vPosition;
         n = vPosition;
     }
 </script>
@@ -20,14 +19,22 @@
     precision mediump float;
     varying vec4 v_color;
 
-    uniform sampler2D texMap;
+    uniform int v_TexIndex;
+    uniform sampler2D u_Texture0;
+    uniform sampler2D u_Texture1;
+    
     varying vec4 n;
 
-    varying vec4 M_T;
     void main() {
         // gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
         vec2 uv = vec2((1.0 - atan(n.z, n.x)) / (2.0 * 3.14), acos(n.y) / 3.14);
-        gl_FragColor = texture2D(texMap, uv);
+        if (v_TexIndex == 0) {
+            gl_FragColor = texture2D(u_Texture0, uv);
+        } else {
+            gl_FragColor = texture2D(u_Texture1, uv);
+        }
+        
+        // gl_FragColor = texture2D(u_Texture0, uv);
     }
 </script>
 
@@ -36,7 +43,7 @@
 <script type="text/javascript" src="../angelCommon/MV.js"></script>
 <script type="text/javascript" src="P2.js"></script>
 <body>
-<canvas id="gl-canvas" width="512" height="512">
+<canvas id="gl-canvas" width="1800" height="900">
 <!-- The following message is displayed if the browser doesn’t
 -- support HTML5 -->
 Sorry; your web browser does not support HTML5's canvas element.
