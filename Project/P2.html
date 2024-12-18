@@ -1,0 +1,48 @@
+<html>
+    <h1>P2</h1>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+    attribute vec4 vPosition;
+
+    uniform mat4 M;
+    uniform mat4 V;
+    uniform mat4 P;
+
+    varying vec4 M_T;
+    varying vec4 n;
+    void main() {
+        gl_Position = P * V * vPosition;
+        M_T = M * vPosition;
+        n = vPosition;
+    }
+</script>
+<script id="fragment-shader" type="x-shader/x-fragment">
+    precision mediump float;
+    varying vec4 v_color;
+
+    uniform sampler2D texMap;
+    varying vec4 n;
+
+    varying vec4 M_T;
+    void main() {
+        // gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+        vec2 uv = vec2((1.0 - atan(n.z, n.x)) / (2.0 * 3.14), acos(n.y) / 3.14);
+        gl_FragColor = texture2D(texMap, uv);
+    }
+</script>
+
+<script type="text/javascript" src="../angelCommon/webgl-utils.js"></script>
+<script type="text/javascript" src="../angelCommon/initShaders.js"></script>
+<script type="text/javascript" src="../angelCommon/MV.js"></script>
+<script type="text/javascript" src="P2.js"></script>
+<body>
+<canvas id="gl-canvas" width="512" height="512">
+<!-- The following message is displayed if the browser doesn’t
+-- support HTML5 -->
+Sorry; your web browser does not support HTML5's canvas element.
+</canvas>
+</div>
+</body>
+</html>
+
+
